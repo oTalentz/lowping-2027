@@ -1,6 +1,17 @@
 <!DOCTYPE html>
 <html lang="pt-BR" class="antialiased dark scroll-smooth">
 <head>
+    <script>
+    // Detector de capacidade do device - roda antes de tudo
+    (function() {
+        var cores = navigator.hardwareConcurrency || 4;
+        var mem = navigator.deviceMemory || 4;
+        var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isLowEnd = cores <= 4 || mem <= 4 || isMobile || reducedMotion;
+        if (isLowEnd) document.documentElement.classList.add('low-end');
+    })();
+    </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>lowping — VPS</title>
@@ -94,6 +105,22 @@
             -webkit-backdrop-filter: blur(2px);
             z-index: 0;
         }
+
+        /* ===== OTIMIZACOES LOW-END ===== */
+        .low-end body::before {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            background-color: rgba(10, 5, 8, 0.9);
+        }
+        .low-end #bgParticles { display: none; }
+        .low-end .menu-particles { display: none; }
+        .low-end .mix-blend-plus-lighter,
+        .low-end [class*="mix-blend"] { mix-blend-mode: normal !important; }
+        .low-end .backdrop-blur-md,
+        .low-end .backdrop-blur-sm,
+        .low-end [class*="backdrop-blur"] { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        .low-end .drop-shadow-xl,
+        .low-end [class*="drop-shadow"] { filter: none !important; }
 
         .font-syncopate { font-family: 'Syncopate', sans-serif; }
         .font-mono-tech { font-family: 'Space Mono', monospace; }
@@ -506,13 +533,13 @@
             </div>
 
             <div class="hidden md:flex items-center gap-3">
-                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                     PAINEL
                 </a>
-                <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                     FINANCEIRO
                 </a>
-                <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                     CONTATO
                 </button>
             </div>
@@ -786,6 +813,9 @@
            ============================================================ */
         const BgParticles = (function () {
             const canvas = document.getElementById('bgParticles');
+            if (!canvas || document.documentElement.classList.contains('low-end')) {
+                return { start: function(){}, stop: function(){} };
+            }
             const ctx = canvas.getContext('2d');
             let particles = [];
             let raf = null;
@@ -793,13 +823,13 @@
             const LINK_DIST = 130;
 
             function resize() {
-                const dpr = window.devicePixelRatio || 1;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
                 canvas.width  = window.innerWidth  * dpr;
                 canvas.height = window.innerHeight * dpr;
                 canvas.style.width  = window.innerWidth  + 'px';
                 canvas.style.height = window.innerHeight + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                const count = Math.max(30, Math.floor((window.innerWidth * window.innerHeight) / 22000));
+                const count = Math.max(20, Math.floor((window.innerWidth * window.innerHeight) / 30000));
                 particles = [];
                 for (let i = 0; i < count; i++) {
                     particles.push({

@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>lowping - Existe um monstro</title>
+    <script>
+    // Detector de capacidade do device - roda antes de tudo
+    (function() {
+        var cores = navigator.hardwareConcurrency || 4;
+        var mem = navigator.deviceMemory || 4;
+        var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+        var reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        var isLowEnd = cores <= 4 || mem <= 4 || isMobile || reducedMotion;
+        if (isLowEnd) document.documentElement.classList.add('low-end');
+    })();
+    </script>
     <meta name="description" content="LowPing - Servidores de jogos e VPS premium no Brasil. Minecraft hosting com Ryzen 9 5950X, proteção DDoS e baixa latência.">
     <meta name="keywords" content="lowping, minecraft server, vps brasil, hosting de jogos, servidores minecraft, vps premium">
     <meta name="author" content="LowPing">
@@ -95,6 +106,18 @@
             z-index: 0;
         }
 
+        /* ===== OTIMIZACOES LOW-END ===== */
+        .low-end body::before {
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            background-color: rgba(10, 5, 8, 0.85);
+        }
+        .low-end .jinx-mask img {
+            filter: brightness(1.4) saturate(1.2);
+        }
+        .low-end #bgParticles { display: none; }
+        .low-end .menu-particles { display: none; }
+
         .font-syncopate { font-family: 'Syncopate', sans-serif; }
         .font-mono-tech { font-family: 'Space Mono', monospace; }
 
@@ -178,6 +201,11 @@
             0% { transform: scale(1.08); opacity: 0; filter: blur(4px) brightness(1.8) saturate(1.5) contrast(1.15) drop-shadow(0 0 30px rgba(255,45,146,0.15)); }
             100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1.8) saturate(1.5) contrast(1.15) drop-shadow(0 0 30px rgba(255,45,146,0.15)); }
         }
+        @keyframes subtleScaleLite {
+            0% { transform: scale(1.08); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .low-end .animate-hero-img { animation: subtleScaleLite 1.5s ease-out forwards !important; }
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -540,13 +568,13 @@
                 </div>
                 
                 <div class="hidden md:flex items-center gap-3">
-                    <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                    <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                         PAINEL
                     </a>
-                    <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                    <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                         FINANCEIRO
                     </a>
-                    <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
+                    <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold drop-shadow-[0_0_6px_rgba(255,255,255,0.3)]">
                         CONTATO
                     </button>
                 </div>
@@ -757,6 +785,9 @@
            ============================================================ */
         const BgParticles = (function () {
             const canvas = document.getElementById('bgParticles');
+            if (!canvas || document.documentElement.classList.contains('low-end')) {
+                return { start: function(){}, stop: function(){} };
+            }
             const ctx = canvas.getContext('2d');
             let particles = [];
             let raf = null;
@@ -764,13 +795,13 @@
             const LINK_DIST = 140;
 
             function resize() {
-                const dpr = window.devicePixelRatio || 1;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
                 canvas.width  = window.innerWidth  * dpr;
                 canvas.height = window.innerHeight * dpr;
                 canvas.style.width  = window.innerWidth  + 'px';
                 canvas.style.height = window.innerHeight + 'px';
                 ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-                const count = Math.max(35, Math.floor((window.innerWidth * window.innerHeight) / 20000));
+                const count = Math.max(20, Math.floor((window.innerWidth * window.innerHeight) / 30000));
                 particles = [];
                 for (let i = 0; i < count; i++) {
                     particles.push({
@@ -842,6 +873,7 @@
            ============================================================ */
         const Parallax = (function () {
             const layers = document.querySelectorAll('.parallax-layer');
+            if (!layers.length || document.documentElement.classList.contains('low-end')) return;
             let mx = 0, my = 0, tx = 0, ty = 0;
 
             window.addEventListener('mousemove', (e) => {
@@ -864,7 +896,8 @@
         /* ============================================================
            MAGNETIC BUTTONS — botões são atraídos pelo cursor
            ============================================================ */
-        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+        if (!document.documentElement.classList.contains('low-end')) {
+            document.querySelectorAll('.magnetic-btn').forEach(btn => {
             btn.addEventListener('mousemove', (e) => {
                 const rect = btn.getBoundingClientRect();
                 const x = e.clientX - rect.left - rect.width / 2;
@@ -875,6 +908,7 @@
                 btn.style.transform = 'translate(0, 0)';
             });
         });
+        }
 
         /* ============================================================
            GSAP TIMELINE DE ENTRADA — orquestra o hero com sequência
@@ -1041,7 +1075,7 @@
             const btnTexts    = closeBtn.querySelectorAll('p');
             const btnIcon     = closeBtn.querySelector('.menu-button-icon');
             const particlesCanvas = document.getElementById('menuParticles');
-            const pctx        = particlesCanvas.getContext('2d');
+            const pctx        = particlesCanvas ? particlesCanvas.getContext('2d') : null;
 
             let isOpen = false;
             let activeTl = null;
