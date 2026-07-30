@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>lowping — VPS</title>
+    <meta name="description" content="VPS premium no Brasil com Ryzen 9 5950X, NVMe SSD, proteção DDoS e planos flexíveis. Performance de ponta para sua infraestrutura.">
+    <meta name="keywords" content="vps brasil, vps premium, servidores vps, cloud server, lowping vps, ryzen vps">
+    <meta name="author" content="LowPing">
+    <meta name="theme-color" content="#0a0508">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LowPing — VPS">
+    <meta property="og:description" content="VPS premium no Brasil com Ryzen 9 5950X, NVMe e proteção DDoS.">
+    <meta property="og:image" content="jinx-roxo.webp">
+    <meta property="og:url" content="https://lowping.com.br/vps">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LowPing — VPS">
+    <meta name="twitter:description" content="VPS premium no Brasil com Ryzen 9 5950X.">
+    <meta name="twitter:image" content="jinx-roxo.webp">
+    <link rel="icon" type="image/png" href="jinx-roxo.png">
+    <link rel="dns-prefetch" href="https://painel.lowping.com.br">
+    <link rel="dns-prefetch" href="https://financeiro.lowping.com.br">
+    <link rel="dns-prefetch" href="https://discord.gg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1130,46 +1147,48 @@
         });
     </script>
 
-    <!-- PRELOADER SCRIPT -->
+    <!-- PRELOADER + SERVICE WORKER -->
     <script>
     (function() {
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').catch(function(e) {
+                    console.warn('SW registration failed:', e);
+                });
+            });
+        }
+
         const preloader = document.getElementById('preloader');
         const fill = document.getElementById('preloaderFill');
         const status = document.getElementById('preloaderStatus');
         if (!preloader) return;
 
-        let progress = 0;
-        let resourcesTotal = 0;
-        let resourcesLoaded = 0;
+        let progress = 0, resourcesTotal = 0, resourcesLoaded = 0;
 
         function setProgress(pct, label) {
             progress = Math.min(pct, 100);
             if (fill) fill.style.width = progress + '%';
             if (status && label) status.textContent = label;
         }
-
         function finish() {
             setProgress(100, 'Pronto');
+            sessionStorage.setItem('lp_visited', '1');
             setTimeout(() => preloader.classList.add('hidden'), 400);
         }
+        function setProgressFast() { setProgress(70, 'Carregando do cache...'); }
 
-        const images = document.querySelectorAll('img[src]');
-        resourcesTotal = images.length;
-        if (resourcesTotal === 0) resourcesTotal = 1;
+        const isCached = sessionStorage.getItem('lp_visited');
+        if (isCached) { setProgressFast(); }
 
+        const images = document.querySelectorAll('img[src], source[srcset]');
+        resourcesTotal = images.length || 1;
         setProgress(10, 'Inicializando...');
 
-        images.forEach(function(img) {
-            var src = img.getAttribute('src');
+        images.forEach(function(el) {
+            var src = el.getAttribute('src') || el.getAttribute('srcset');
             if (!src || src.startsWith('data:')) { resourcesLoaded++; return; }
             var preload = new Image();
-            preload.onload = function() {
-                resourcesLoaded++;
-                var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
-                setProgress(pct, 'Carregando assets...');
-                if (resourcesLoaded >= resourcesTotal) setProgress(80, 'Renderizando...');
-            };
-            preload.onerror = function() {
+            preload.onload = preload.onerror = function() {
                 resourcesLoaded++;
                 var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
                 setProgress(pct, 'Carregando assets...');
@@ -1180,12 +1199,12 @@
 
         window.addEventListener('load', function() {
             setProgress(90, 'Finalizando...');
-            setTimeout(finish, 600);
+            setTimeout(finish, 400);
         });
 
         setTimeout(function() {
             if (!preloader.classList.contains('hidden')) finish();
-        }, 8000);
+        }, 6000);
     })();
     </script>
 </body>

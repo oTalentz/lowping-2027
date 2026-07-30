@@ -4,6 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>lowping - Existe um monstro</title>
+    <meta name="description" content="LowPing - Servidores de jogos e VPS premium no Brasil. Minecraft hosting com Ryzen 9 5950X, proteção DDoS e baixa latência.">
+    <meta name="keywords" content="lowping, minecraft server, vps brasil, hosting de jogos, servidores minecraft, vps premium">
+    <meta name="author" content="LowPing">
+    <meta name="theme-color" content="#0a0508">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="LowPing - Existe um monstro">
+    <meta property="og:description" content="Servidores de jogos e VPS premium no Brasil. Baixa latência, proteção DDoS, Ryzen 9 5950X.">
+    <meta property="og:image" content="jinx-roxo.webp">
+    <meta property="og:url" content="https://lowping.com.br">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="LowPing - Existe um monstro">
+    <meta name="twitter:description" content="Servidores de jogos e VPS premium no Brasil.">
+    <meta name="twitter:image" content="jinx-roxo.webp">
+    <link rel="icon" type="image/png" href="jinx-roxo.png">
+    <link rel="dns-prefetch" href="https://painel.lowping.com.br">
+    <link rel="dns-prefetch" href="https://financeiro.lowping.com.br">
+    <link rel="dns-prefetch" href="https://discord.gg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -493,12 +510,15 @@
           Positioned on the right and masked to blend seamlessly into the dark UI.
         -->
         <div class="absolute right-0 top-0 w-full lg:w-[65%] h-full z-0 jinx-mask overflow-hidden parallax-layer" data-parallax-speed="0.03">
-            <img src="jinx-roxo.png" 
+            <picture>
+                <source srcset="jinx-roxo.webp" type="image/webp">
+                <img src="jinx-roxo.png" 
                  alt="Jinx Character Art" 
                  loading="eager"
                  fetchpriority="high"
                  decoding="async"
                  class="w-full h-full object-cover object-center lg:object-[center_right] block pointer-events-none select-none animate-hero-img origin-right opacity-100">
+            </picture>
         </div>
 
         <!-- Layer 2: Faint Watermark Typography -->
@@ -1183,51 +1203,54 @@
         })();
     </script>
 
-    <!-- PRELOADER SCRIPT -->
+    <!-- PRELOADER + SERVICE WORKER -->
     <script>
     (function() {
+        // Registra service worker para cache offline
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').catch(function(e) {
+                    console.warn('SW registration failed:', e);
+                });
+            });
+        }
+
         const preloader = document.getElementById('preloader');
         const fill = document.getElementById('preloaderFill');
         const status = document.getElementById('preloaderStatus');
         if (!preloader) return;
 
-        let progress = 0;
-        let resourcesTotal = 0;
-        let resourcesLoaded = 0;
+        let progress = 0, resourcesTotal = 0, resourcesLoaded = 0;
 
         function setProgress(pct, label) {
             progress = Math.min(pct, 100);
             if (fill) fill.style.width = progress + '%';
             if (status && label) status.textContent = label;
         }
-
         function finish() {
             setProgress(100, 'Pronto');
+            sessionStorage.setItem('lp_visited', '1');
             setTimeout(() => preloader.classList.add('hidden'), 400);
         }
+        function setProgressFast() { setProgress(70, 'Carregando do cache...'); }
 
-        // Coleta todas as imagens da pagina para pre-carregar
-        const images = document.querySelectorAll('img[src]');
-        resourcesTotal = images.length;
-
-        if (resourcesTotal === 0) {
-            resourcesTotal = 1;
+        // Cache awareness: se ja visitou, skip rapido
+        const isCached = sessionStorage.getItem('lp_visited');
+        if (isCached) {
+            setProgressFast();
         }
+
+        // Coleta todas as imagens (incluindo <picture> sources)
+        const images = document.querySelectorAll('img[src], source[srcset]');
+        resourcesTotal = images.length || 1;
 
         setProgress(10, 'Inicializando...');
 
-        // Pre-carrega cada imagem local
-        images.forEach(function(img) {
-            var src = img.getAttribute('src');
+        images.forEach(function(el) {
+            var src = el.getAttribute('src') || el.getAttribute('srcset');
             if (!src || src.startsWith('data:')) { resourcesLoaded++; return; }
             var preload = new Image();
-            preload.onload = function() {
-                resourcesLoaded++;
-                var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
-                setProgress(pct, 'Carregando assets...');
-                if (resourcesLoaded >= resourcesTotal) setProgress(80, 'Renderizando...');
-            };
-            preload.onerror = function() {
+            preload.onload = preload.onerror = function() {
                 resourcesLoaded++;
                 var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
                 setProgress(pct, 'Carregando assets...');
@@ -1236,17 +1259,15 @@
             preload.src = src;
         });
 
-        // Aguarda window.onload (todos CSS, scripts e imagens)
         window.addEventListener('load', function() {
             setProgress(90, 'Finalizando...');
-            // Pequeno delay para garantir render do Tailwind
-            setTimeout(finish, 600);
+            setTimeout(finish, 400);
         });
 
-        // Fallback: se onload demorar muito, esconde apos 8s
+        // Fallback: 6s
         setTimeout(function() {
             if (!preloader.classList.contains('hidden')) finish();
-        }, 8000);
+        }, 6000);
     })();
     </script>
 </body>
