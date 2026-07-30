@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="antialiased dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lowping - Existe um monstro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Syncopate:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- GSAP + CustomEase para a navegação cinética -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+    <style>
+        :root {
+            --neon-green: #ff2d92;
+            --dark-green: #1a0a14;
+            --border-green: #3d1a2e;
+        }
+
+        html { overflow-x: hidden; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0a0508;
+            /* Using the extracted smoke texture for the ambient background */
+            background-image: url('https://cdn.aidesigner.ai/extracted-assets/365e05ad698e1e90/9da02305-1519-46a1-b0ab-e65b19321a39-1785351312871.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        /* Dark overlay to push the body background back */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-color: rgba(10, 5, 8, 0.75);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            z-index: 0;
+        }
+
+        .font-syncopate { font-family: 'Syncopate', sans-serif; }
+        .font-mono-tech { font-family: 'Space Mono', monospace; }
+
+        /* The main stenciled/heavy title */
+        .title-arcane {
+            background: linear-gradient(to bottom, #ffffff 40%, #a3a3a3 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0px 10px 30px rgba(255, 45, 146, 0.1);
+        }
+
+        /* Fading the square character JPG into the dark background */
+        .jinx-mask {
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 15%, black 40%, black 100%);
+            mask-image: linear-gradient(to right, transparent 0%, transparent 15%, black 40%, black 100%);
+        }
+
+        /* Large background watermark text */
+        .watermark-text {
+            -webkit-text-stroke: 1px rgba(255, 45, 146, 0.05); /* very faint green stroke */
+            color: transparent;
+        }
+
+        /* Button decorative corner */
+        .btn-discover {
+            position: relative;
+        }
+        .btn-discover::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 8px;
+            height: 8px;
+            border-top: 1px solid var(--neon-green);
+            border-right: 1px solid var(--neon-green);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        .btn-discover:hover::after {
+            opacity: 1;
+            top: -4px;
+            right: -4px;
+        }
+
+        /* Mouse scroll animation */
+        @keyframes scroll {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(8px); opacity: 0; }
+        }
+        .scroll-dot {
+            animation: scroll 1.5s infinite cubic-bezier(0.65, 0, 0.35, 1);
+        }
+
+        /* Decorative left edge line */
+        .edge-indicator {
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 48px;
+            background-color: var(--neon-green);
+            z-index: 50;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes subtleScale {
+            0% { transform: scale(1.08); opacity: 0; filter: blur(4px); }
+            100% { transform: scale(1); opacity: 0.9; filter: blur(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .animate-fade-in-up { animation: fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-fade-in-right { animation: fadeInRight 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        .animate-hero-img { animation: subtleScale 2.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 2s ease-out forwards; opacity: 0; }
+
+        @keyframes titleGlow {
+            0%, 100% { text-shadow: 0px 10px 30px rgba(255, 45, 146, 0.1); }
+            50% { text-shadow: 0px 10px 50px rgba(255, 45, 146, 0.4), 0px 0px 10px rgba(255,45,146,0.2); }
+        }
+        .title-animated {
+            animation: titleGlow 4s ease-in-out infinite, fadeInUp 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        .delay-100 { animation-delay: 100ms; }
+        .delay-300 { animation-delay: 300ms; }
+        .delay-500 { animation-delay: 500ms; }
+        .delay-700 { animation-delay: 700ms; }
+
+        /* ============================================================
+           NOVAS ANIMAÇÕES — efeitos "wow" no hero
+           ============================================================ */
+
+        /* Glitch no título */
+        .glitch-title {
+            position: relative;
+        }
+        .glitch-title::before,
+        .glitch-title::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: linear-gradient(to bottom, #ffffff 40%, #a3a3a3 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 0;
+            pointer-events: none;
+        }
+        .glitch-title::before {
+            color: #ff2d92;
+            -webkit-text-fill-color: #ff2d92;
+            text-shadow: 2px 0 #ff2d92;
+            animation: glitch-1 3.5s infinite linear alternate-reverse;
+        }
+        .glitch-title::after {
+            color: #00e5ff;
+            -webkit-text-fill-color: #00e5ff;
+            text-shadow: -2px 0 #00e5ff;
+            animation: glitch-2 4s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-1 {
+            0%, 92%, 100% { opacity: 0; transform: translate(0); clip-path: inset(0 0 0 0); }
+            93% { opacity: 0.7; transform: translate(-3px, 0); clip-path: inset(20% 0 60% 0); }
+            95% { opacity: 0.5; transform: translate(3px, 0); clip-path: inset(70% 0 10% 0); }
+            97% { opacity: 0.6; transform: translate(-2px, 0); clip-path: inset(40% 0 40% 0); }
+        }
+        @keyframes glitch-2 {
+            0%, 90%, 100% { opacity: 0; transform: translate(0); clip-path: inset(0 0 0 0); }
+            91% { opacity: 0.5; transform: translate(3px, 0); clip-path: inset(10% 0 80% 0); }
+            94% { opacity: 0.6; transform: translate(-3px, 0); clip-path: inset(50% 0 30% 0); }
+            96% { opacity: 0.4; transform: translate(2px, 0); clip-path: inset(80% 0 5% 0); }
+        }
+
+        /* Scanline sutil sobre o hero */
+        .scanline-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 30;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent 0px,
+                transparent 3px,
+                rgba(255, 45, 146, 0.015) 3px,
+                rgba(255, 45, 146, 0.015) 4px
+            );
+            mix-blend-mode: screen;
+        }
+        .scanline-sweep {
+            position: absolute;
+            left: 0; right: 0;
+            height: 120px;
+            background: linear-gradient(to bottom, transparent, rgba(255, 45, 146, 0.06), transparent);
+            pointer-events: none;
+            z-index: 31;
+            animation: sweep 6s ease-in-out infinite;
+        }
+        @keyframes sweep {
+            0% { top: -120px; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Pulse ring no botão CTA */
+        .pulse-ring {
+            position: absolute;
+            inset: 0;
+            border: 1px solid #ff2d92;
+            opacity: 0;
+            animation: pulse-ring 3s ease-out infinite;
+            pointer-events: none;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(1); opacity: 0.6; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+
+        /* Letra "p" com brilho pulsante */
+        .title-letter-glow {
+            animation: letter-glow 3s ease-in-out infinite;
+        }
+        @keyframes letter-glow {
+            0%, 100% { filter: drop-shadow(0 0 0px rgba(255,45,146,0)); }
+            50% { filter: drop-shadow(0 0 15px rgba(255,45,146,0.6)); }
+        }
+
+        /* Reveal de texto letra por letra */
+        .char-reveal {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(40px) rotate(8deg);
+        }
+
+        /* Parallax layers */
+        .parallax-layer {
+            will-change: transform;
+            transition: transform 0.15s ease-out;
+        }
+
+        /* Magnetic button */
+        .magnetic-btn {
+            transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Contador/decodificador */
+        .decode-text {
+            font-family: 'Space Mono', monospace;
+        }
+
+        /* Vignette no hero */
+        .hero-vignette {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+            background: radial-gradient(ellipse at center, transparent 40%, rgba(10,5,8,0.5) 100%);
+        }
+
+        /* ============================================================
+           NAVEGAÇÃO CINÉTICA — overlay fullscreen (tema lowping)
+           ============================================================ */
+        .kinetic-nav-root { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+        .nav-overlay-wrapper {
+            position: fixed; inset: 0; display: none;
+            pointer-events: auto;
+        }
+        .nav-overlay-wrapper .overlay {
+            position: absolute; inset: 0;
+            background: rgba(10, 5, 8, 0.6);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .menu-content {
+            position: absolute; top: 0; right: 0; bottom: 0;
+            width: 100%; max-width: 720px;
+            will-change: transform;
+        }
+        .menu-bg { position: absolute; inset: 0; overflow: hidden; }
+        .backdrop-layer {
+            position: absolute; inset: 0;
+            will-change: transform;
+        }
+        .backdrop-layer.first  { background: linear-gradient(135deg, #0d050a 0%, #140a14 100%); }
+        .backdrop-layer.second { background: linear-gradient(135deg, #140a14 0%, #1a0a14 60%, #0d050a 100%); }
+        .backdrop-layer.third  { background: linear-gradient(135deg, rgba(255,45,146,0.04) 0%, rgba(10,5,8,0.9) 100%); }
+
+        /* Canvas de partículas sutis no fundo do menu */
+        .menu-particles {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none; display: block;
+        }
+
+        /* Conteúdo do menu */
+        .menu-content-wrapper {
+            position: relative; z-index: 2;
+            height: 100%; display: flex; flex-direction: column;
+            justify-content: center; padding: 6rem 3rem 4rem;
+        }
+        .menu-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+        .menu-list-item { overflow: hidden; position: relative; }
+        .nav-link {
+            position: relative; display: flex; align-items: baseline; gap: 1.5rem;
+            width: 100%; text-decoration: none; padding: 0.4rem 0;
+            font-family: 'Syncopate', sans-serif; font-weight: 700;
+            font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: 1.05;
+            letter-spacing: -0.02em; color: #e8efe8;
+            transition: color 0.3s ease, padding-left 0.3s ease;
+        }
+        .nav-link:hover { color: #ff2d92; padding-left: 1.2rem; }
+        .nav-link-text { margin: 0; position: relative; display: inline-block; }
+        .nav-link-hover-bg {
+            position: absolute; left: 0; bottom: 0.35rem; height: 2px; width: 0;
+            background: linear-gradient(90deg, #ff2d92, transparent);
+            transition: width 0.4s cubic-bezier(0.65,0.05,0,1);
+        }
+        .nav-link:hover .nav-link-hover-bg { width: 100%; }
+
+        .nav-link-index {
+            font-family: 'Space Mono', monospace; font-size: 0.85rem;
+            color: #8a4a6a; letter-spacing: 0.3em; flex-shrink: 0;
+            line-height: 1; min-width: 2.5em;
+        }
+
+        /* Botão fechar dentro do menu */
+        .nav-close-btn {
+            position: absolute; top: 2.2rem; right: 2.5rem;
+            display: inline-flex; align-items: center; gap: 0.8rem;
+            background: transparent; border: 1px solid rgba(255,45,146,0.3);
+            color: #e8efe8; padding: 0.7rem 1.2rem; cursor: pointer;
+            font-family: 'Space Mono', monospace; font-size: 0.7rem;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            transition: all 0.3s ease; z-index: 5;
+        }
+        .nav-close-btn:hover { border-color: #ff2d92; color: #ff2d92; box-shadow: 0 0 20px rgba(255,45,146,0.2); }
+        .menu-button-text { overflow: hidden; position: relative; height: 1em; display: inline-block; }
+        .menu-button-text p { margin: 0; transition: none; }
+        .icon-wrap { display: inline-flex; width: 14px; height: 14px; }
+        .menu-button-icon { transition: none; }
+
+        /* Rodapé do menu */
+        .menu-footer {
+            position: absolute; left: 3rem; bottom: 2.5rem; right: 3rem;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            font-family: 'Space Mono', monospace; font-size: 0.65rem;
+            letter-spacing: 0.3em; color: #8a4a6a; text-transform: uppercase;
+            z-index: 3;
+        }
+        .menu-footer .mf-label { color: #8a7f8a; }
+        .menu-footer a { color: #ff2d92; text-decoration: none; transition: opacity 0.3s; }
+        .menu-footer a:hover { opacity: 0.7; }
+
+        /* Toast container deve ficar abaixo do menu */
+        #ui-toast-container { z-index: 70 !important; }
+
+        /* ============================================================
+           MODAL DE CONTATO
+           ============================================================ */
+        .contact-modal-overlay {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(10, 5, 8, 0.8);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .contact-modal-overlay.open { display: flex; opacity: 1; }
+        .contact-modal {
+            background: #0d0a0d;
+            border: 1px solid #3d1a2e;
+            clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
+            max-width: 460px; width: 90%;
+            padding: 2.5rem;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .contact-modal-overlay.open .contact-modal { transform: scale(1) translateY(0); }
+        .contact-modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: transparent; border: 1px solid #3d1a2e;
+            color: #8a7f8a; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .contact-modal-close:hover { border-color: #ff2d92; color: #ff2d92; }
+        .contact-channel {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1.25rem; border: 1px solid #3d1a2e;
+            margin-bottom: 0.75rem; cursor: pointer;
+            transition: all 0.3s ease; text-decoration: none;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .contact-channel:hover {
+            border-color: #ff2d92; background: rgba(255, 45, 146, 0.05);
+            transform: translateX(4px);
+        }
+        .contact-channel-icon {
+            width: 44px; height: 44px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #3d1a2e; font-size: 22px;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.3s ease;
+        }
+        .contact-channel:hover .contact-channel-icon { border-color: #ff2d92; color: #ff2d92; }
+    </style>
+</head>
+<body class="min-h-screen text-white flex items-center justify-center overflow-hidden selection:bg-[#ff2d92] selection:text-black relative">
+
+    <!-- Global Particle effect for atmosphere matching the toxic chemtech vibe -->
+    <!-- Canvas de partículas de fundo (sutil, diferente do menu) -->
+    <canvas id="bgParticles" class="fixed inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
+
+    <!-- Main Content Boundary (The "lowping Square") -->
+    <main class="w-full h-screen min-h-screen flex flex-col relative preserve-3d isolate bg-[#0d050a]/60 backdrop-blur-md overflow-hidden z-20">
+
+        <!-- Scanline + Sweep + Vignette overlays -->
+        <div class="scanline-overlay"></div>
+        <div class="scanline-sweep"></div>
+        <div class="hero-vignette"></div>
+
+        <!-- Left edge decorative bar -->
+        <div class="edge-indicator shadow-[0_0_10px_#ff2d92] animate-fade-in delay-700"></div>
+
+        <!-- 
+          Layer 1: Background Element Setup 
+          Using extracted Asset 1 containing Jinx and the neon graffiti.
+          Positioned on the right and masked to blend seamlessly into the dark UI.
+        -->
+        <div class="absolute right-0 top-0 w-full lg:w-[65%] h-full z-0 jinx-mask overflow-hidden parallax-layer" data-parallax-speed="0.03">
+            <img src="../imagens-extras/JinxRoxo.png" 
+                 alt="Jinx Character Art" 
+                 class="w-full h-full object-cover object-center lg:object-[center_right] mix-blend-lighten block pointer-events-none select-none animate-hero-img origin-right">
+        </div>
+
+        <!-- Layer 2: Faint Watermark Typography -->
+        <div class="absolute inset-x-0 top-1/2 -translate-y-1/2 flex justify-center items-center z-0 pointer-events-none overflow-hidden h-full parallax-layer" data-parallax-speed="0.015">
+            <h2 class="font-syncopate font-bold text-[6rem] lg:text-[14rem] watermark-text tracking-tighter scale-y-110 select-none whitespace-nowrap animate-fade-in duration-[3000ms]">lowping</h2>
+        </div>
+
+        <!-- Layer 3: Interactive UI Chrome -->
+        <div class="relative z-20 flex flex-col h-full w-full pointer-events-none">
+            
+            <!-- HEADER -->
+            <header class="flex justify-between items-center px-6 lg:px-16 py-10 pointer-events-auto w-full animate-fade-in-up">
+                <button id="menuBtn" class="text-white hover:text-[#ff2d92] transition-colors focus:outline-none focus:ring-1 focus:ring-[#ff2d92] focus:ring-offset-4 focus:ring-offset-transparent flex items-center group rounded-sm p-1" aria-label="Abrir Menu">
+                    <div class="w-6 h-[2px] bg-current relative before:absolute before:-top-2 before:w-8 before:h-[2px] before:bg-current before:right-0 after:absolute after:top-2 after:w-4 after:h-[2px] after:bg-current after:left-0 group-hover:before:w-6 group-hover:after:w-6 transition-all duration-300"></div>
+                </button>
+                
+                <div class="font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
+                    lowping
+                </div>
+                
+                <div class="flex items-center gap-3">
+                    <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                        PAINEL
+                    </a>
+                    <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                        FINANCEIRO
+                    </a>
+                </div>
+            </header>
+
+            <!-- MAIN NARRATIVE CONTENT -->
+            <section class="flex-1 px-8 lg:px-20 flex flex-col justify-center max-w-4xl pointer-events-auto">
+                <div class="space-y-4">
+
+                    <!-- Giant Title -->
+                    <h1 class="glitch-title font-syncopate font-bold text-5xl sm:text-6xl lg:text-[7rem] leading-none tracking-tight title-arcane mt-4 mb-2 animate-fade-in-up delay-300" data-text="lowping">
+                        low<span class="relative z-10 title-letter-glow">p</span>ing
+                    </h1>
+
+                    <!-- Quote Block -->
+                    <div class="flex flex-col gap-2 mt-20 mb-14 pl-4 border-l-2 border-[#3d1a2e] animate-fade-in-right delay-500">
+                        <p class="font-mono-tech text-[#ff2d92] text-sm lg:text-base tracking-[0.15em] font-bold uppercase drop-shadow-[0_0_8px_rgba(255,45,146,0.3)] select-text cursor-text">
+                            " Existe um monstro "
+                        </p>
+                        <p class="font-mono-tech text-[#8a7f8a] text-[10px] lg:text-xs tracking-[0.2em] uppercase select-text cursor-text">
+                            Dentro de todos nós
+                        </p>
+                    </div>
+
+                    <!-- CTA -->
+                    <div class="flex items-center animate-fade-in-up delay-700">
+                        <a id="discoverBtn" href="../Pagina 2/games.html" class="magnetic-btn btn-discover group relative inline-flex items-center justify-center gap-4 bg-transparent border border-[#3d1a2e] px-8 py-3.5 text-white hover:border-[#ff2d92] hover:bg-[#ff2d92]/10 transition-all duration-300 focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                            <span class="pulse-ring"></span>
+                            <span class="font-mono-tech text-[10px] font-bold tracking-[0.3em] group-hover:text-[#ff2d92] transition-colors uppercase">GAMES</span>
+                            <!-- Small geometric decor in button -->
+                            <svg width="10" height="10" viewBox="0 0 10 10" fill="none" class="opacity-50 group-hover:opacity-100 group-hover:fill-[#ff2d92] transition-all transform group-hover:translate-x-1">
+                                <path d="M10 0L0 0V1L9 1V10H10V0Z" fill="currentColor"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOOTER CHROME -->
+            <footer class="px-6 lg:px-16 py-10 flex justify-between items-end pointer-events-auto w-full animate-fade-in delay-500">
+               
+               <!-- Left Pagination (Rotated) -->
+               <div class="absolute left-4 lg:left-8 top-1/2 -translate-y-1/2 -rotate-90 origin-center text-[#ff2d92] font-mono-tech text-[10px] tracking-widest flex items-center gap-4">
+                   <span>01 / 07</span>
+                   <div class="w-12 h-[1px] bg-[#3d1a2e]"></div>
+               </div>
+
+               <!-- Center Scroll Indicator -->
+               <button id="scrollIndicator" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 hover:opacity-100 transition-opacity focus:outline-none group pointer-events-auto" aria-label="Rolar para baixo">
+                   <div class="w-5 h-8 rounded-full border border-white/40 group-hover:border-[#ff2d92]/80 flex justify-center p-1 transition-colors duration-300">
+                       <div class="w-1 h-1.5 bg-white group-hover:bg-[#ff2d92] rounded-full scroll-dot transition-colors duration-300"></div>
+                   </div>
+               </button>
+
+               <!-- Right Copyright -->
+               <div class="ml-auto w-full text-right pointer-events-none mb-1">
+                   <p class="font-mono-tech text-[8px] tracking-[0.3em] text-[#8a7f8a] uppercase md:mr-10 lg:mr-20">
+                       2026 Todos os direitos reservados para lowping
+                   </p>
+               </div>
+            </footer>
+
+            <!-- Right Edge Social Navigation -->
+            <aside class="absolute right-6 lg:right-12 top-1/2 -translate-y-1/2 flex flex-col gap-8 pointer-events-auto items-center animate-fade-in delay-700">
+                <div class="w-[1px] h-12 bg-gradient-to-b from-transparent to-[#3d1a2e]"></div>
+                <button class="social-btn text-white/50 hover:text-[#ff2d92] hover:scale-110 hover:-translate-x-0.5 transition-all focus:outline-none" aria-label="Facebook" data-platform="Facebook">
+                    <i class="ph-fill ph-facebook-logo text-lg"></i>
+                </button>
+                <button class="social-btn text-white/50 hover:text-[#ff2d92] hover:scale-110 hover:-translate-x-0.5 transition-all focus:outline-none" aria-label="WhatsApp" data-platform="WhatsApp">
+                    <i class="ph-fill ph-whatsapp-logo text-lg"></i>
+                </button>
+                <button class="social-btn text-white/50 hover:text-[#ff2d92] hover:scale-110 hover:-translate-x-0.5 transition-all focus:outline-none" aria-label="Instagram" data-platform="Instagram">
+                    <i class="ph-fill ph-instagram-logo text-lg"></i>
+                </button>
+                <div class="w-[1px] h-12 bg-gradient-to-t from-transparent to-[#3d1a2e]"></div>
+            </aside>
+            
+        </div>
+    </main>
+
+    <!-- UI Interaction Controller (Toast system for simulated functionality) -->
+    <div id="ui-toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3 pointer-events-none"></div>
+
+    <!-- Modal de Contato -->
+    <div class="contact-modal-overlay" id="contactModal">
+        <div class="contact-modal">
+            <button class="contact-modal-close" id="contactModalClose" aria-label="Fechar">
+                <i class="ph ph-x"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="font-mono-tech text-[10px] tracking-[0.3em] text-[#ff2d92] uppercase mb-2">Fale Conosco</div>
+                <h3 class="font-syncopate text-2xl text-white uppercase tracking-wider">Contato</h3>
+                <p class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-2">Escolha um canal</p>
+            </div>
+            <a href="https://discord.gg/apFUEw4zyv" target="_blank" rel="noopener noreferrer" class="contact-channel">
+                <div class="contact-channel-icon text-white">
+                    <i class="ph-fill ph-discord-logo"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="font-mono-tech text-sm text-white font-bold uppercase tracking-wider">Discord</div>
+                    <div class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-0.5">Suporte e comunidade</div>
+                </div>
+                <i class="ph ph-arrow-up-right text-lg text-[#8a7f8a]"></i>
+            </a>
+            <a href="https://financeiro.lowping.com.br/submitticket.php" target="_blank" rel="noopener noreferrer" class="contact-channel">
+                <div class="contact-channel-icon text-white">
+                    <i class="ph ph-ticket"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="font-mono-tech text-sm text-white font-bold uppercase tracking-wider">Ticket</div>
+                    <div class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-0.5">Suporte formal e acompanhamento</div>
+                </div>
+                <i class="ph ph-arrow-up-right text-lg text-[#8a7f8a]"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         NAVEGAÇÃO CINÉTICA — Overlay fullscreen
+         ============================================================ -->
+    <div class="kinetic-nav-root" id="kineticNav">
+      <div data-nav="closed" class="nav-overlay-wrapper" id="navOverlay">
+        <div class="overlay" id="navOverlayBg"></div>
+        <nav class="menu-content" id="menuContent">
+          <div class="menu-bg">
+            <div class="backdrop-layer first"></div>
+            <div class="backdrop-layer second"></div>
+            <div class="backdrop-layer third"></div>
+
+            <!-- Partículas sutis no fundo do menu -->
+            <canvas class="menu-particles" id="menuParticles"></canvas>
+          </div>
+
+          <div class="menu-content-wrapper">
+            <ul class="menu-list" id="menuList">
+              <li class="menu-list-item" data-shape="1">
+                <a href="#" class="nav-link w-inline-block active">
+                  <span class="nav-link-index">00</span>
+                  <span class="nav-link-text">Início</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+              <li class="menu-list-item" data-shape="2">
+                <a href="../Pagina 2/games.html" class="nav-link w-inline-block">
+                  <span class="nav-link-index">01</span>
+                  <span class="nav-link-text">Games</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+              <li class="menu-list-item" data-shape="3">
+                <a href="../Pagina 2/vps.html" class="nav-link w-inline-block">
+                  <span class="nav-link-index">02</span>
+                  <span class="nav-link-text">Vps</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Botão fechar -->
+          <button role="button" class="nav-close-btn" id="navCloseBtn" aria-label="Fechar menu">
+            <div class="menu-button-text">
+              <p class="p-large">Menu</p>
+              <p class="p-large">Fechar</p>
+            </div>
+            <div class="icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon">
+                <path d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+                <path d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+              </svg>
+            </div>
+          </button>
+
+          <!-- Rodapé do menu -->
+          <div class="menu-footer">
+            <div>
+              <div class="mf-label">Piltover · Zaun</div>
+              <div>2026 — lowping</div>
+            </div>
+            <div style="text-align:right">
+              <div class="mf-label">Social</div>
+              <a href="#">@lowping</a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <script>
+        /* ============================================================
+           PARTÍCULAS DE FUNDO — canvas próprio (sutil, diferente do menu)
+           Pontos rosa que sobem como brasa + linhas de constelação
+           ============================================================ */
+        const BgParticles = (function () {
+            const canvas = document.getElementById('bgParticles');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let raf = null;
+
+            const LINK_DIST = 140;
+
+            function resize() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width  = window.innerWidth  * dpr;
+                canvas.height = window.innerHeight * dpr;
+                canvas.style.width  = window.innerWidth  + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.max(35, Math.floor((window.innerWidth * window.innerHeight) / 20000));
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        r: Math.random() * 1.5 + 0.4,
+                        vx: (Math.random() - 0.5) * 0.08,
+                        vy: -(Math.random() * 0.25 + 0.04),
+                        alpha: Math.random() * 0.3 + 0.06,
+                        twinkle: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                const t = performance.now() * 0.001;
+
+                for (const p of particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < -10) { p.y = window.innerHeight + 10; p.x = Math.random() * window.innerWidth; }
+                    if (p.x < -10) p.x = window.innerWidth + 10;
+                    if (p.x > window.innerWidth + 10) p.x = -10;
+
+                    const a = p.alpha * (0.6 + 0.4 * Math.sin(t * 0.6 + p.twinkle));
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 45, 146, ${a})`;
+                    ctx.fill();
+                }
+
+                // Linhas de constelação
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < LINK_DIST) {
+                            const a = (1 - dist / LINK_DIST) * 0.07;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(255, 45, 146, ${a})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                raf = requestAnimationFrame(draw);
+            }
+
+            function start() { if (raf) return; resize(); draw(); }
+            function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+
+            window.addEventListener('resize', resize);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) stop(); else start();
+            });
+
+            return { start, stop };
+        })();
+
+        BgParticles.start();
+
+        /* ============================================================
+           PARALLAX DO MOUSE — layers reagem ao movimento do cursor
+           ============================================================ */
+        const Parallax = (function () {
+            const layers = document.querySelectorAll('.parallax-layer');
+            let mx = 0, my = 0, tx = 0, ty = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                mx = (e.clientX / window.innerWidth - 0.5) * 2;
+                my = (e.clientY / window.innerHeight - 0.5) * 2;
+            });
+
+            function tick() {
+                tx += (mx - tx) * 0.05;
+                ty += (my - ty) * 0.05;
+                layers.forEach(layer => {
+                    const speed = parseFloat(layer.dataset.parallaxSpeed || 0.02);
+                    layer.style.transform = `translate(${tx * speed * 100}px, ${ty * speed * 100}px)`;
+                });
+                requestAnimationFrame(tick);
+            }
+            tick();
+        })();
+
+        /* ============================================================
+           MAGNETIC BUTTONS — botões são atraídos pelo cursor
+           ============================================================ */
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                btn.style.transform = `translate(${x * 0.25}px, ${y * 0.25}px)`;
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'translate(0, 0)';
+            });
+        });
+
+        /* ============================================================
+           GSAP TIMELINE DE ENTRADA — orquestra o hero com sequência
+           cinematográfica (sobrescreve as animações CSS de entrada)
+           ============================================================ */
+        window.addEventListener('load', () => {
+            if (!window.gsap) return;
+
+            // Registra CustomEase
+            try {
+                if (window.CustomEase) {
+                    gsap.registerPlugin(CustomEase);
+                    if (!gsap.parseEase || !gsap.parseEase('arcane')) {
+                        CustomEase.create('arcane', '0.65, 0.01, 0.05, 0.99');
+                    }
+                }
+            } catch (e) {}
+
+            const ease = (window.CustomEase) ? 'arcane' : 'power3.out';
+
+            // Remove as animações CSS para o GSAP controlar
+            const h1 = document.querySelector('.glitch-title');
+            const quote = document.querySelector('section .border-l-2');
+            const cta = document.querySelector('#discoverBtn').parentElement;
+            const header = document.querySelector('header');
+            const footer = document.querySelector('footer');
+            const aside = document.querySelector('aside');
+            const edge = document.querySelector('.edge-indicator');
+            const watermark = document.querySelector('.watermark-text');
+            const jinxImg = document.querySelector('.jinx-mask img');
+
+            // Esconde tudo que o GSAP vai animar
+            gsap.set([h1, quote, cta], { opacity: 0 });
+            gsap.set([header, footer, aside, edge], { opacity: 0 });
+            gsap.set(watermark, { opacity: 0, scale: 1.1 });
+            gsap.set(jinxImg, { opacity: 0, scale: 1.15, filter: 'blur(8px)' });
+
+            const tl = gsap.timeline({ defaults: { ease: ease } });
+
+            tl
+            // 1. Jinx surge do blur
+            .to(jinxImg, { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 2.2 }, 0)
+            // 2. Watermark fade in lento
+            .to(watermark, { opacity: 1, scale: 1, duration: 3 }, 0.3)
+            // 3. Header desliza de cima
+            .fromTo(header, { y: -40, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 0.4)
+            // 4. Edge indicator
+            .fromTo(edge, { scaleY: 0, opacity: 0 }, { scaleY: 1, opacity: 1, duration: 0.8 }, 0.8)
+            // 5. Título com stagger letra a letra (efeito "reveal")
+            .fromTo(h1, { y: 60, opacity: 0, rotateX: -40 }, { y: 0, opacity: 1, rotateX: 0, duration: 1.4 }, 1.0)
+            // 7. Quote desliza da esquerda
+            .fromTo(quote, { x: -40, opacity: 0 }, { x: 0, opacity: 1, duration: 1 }, 1.8)
+            // 8. CTA sobe
+            .fromTo(cta, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8 }, 2.1)
+            // 9. Footer
+            .fromTo(footer, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 1 }, 2.3)
+            // 10. Aside social
+            .fromTo(aside, { x: 30, opacity: 0 }, { x: 0, opacity: 1, duration: 1 }, 2.5);
+
+            // Efeito de "glitch" burst no título após a entrada
+            tl.add(() => {
+                h1.classList.add('glitch-burst');
+                setTimeout(() => h1.classList.remove('glitch-burst'), 600);
+            }, '+=0.3');
+        });
+
+        /* ============================================================
+           TOAST SYSTEM
+           ============================================================ */
+        const ToastController = {
+            container: document.getElementById('ui-toast-container'),
+            
+            show(message, type = 'info') {
+                const toast = document.createElement('div');
+                toast.className = 'bg-[#0d050a]/95 border border-[#ff2d92] shadow-[0_0_20px_rgba(255,45,146,0.15)] rounded-sm px-5 py-3.5 transform translate-y-4 opacity-0 transition-all duration-400 ease-out flex items-center gap-4 backdrop-blur-md relative overflow-hidden pointer-events-auto min-w-[240px]';
+                
+                // Chrome accent details
+                const line = document.createElement('div');
+                line.className = 'absolute left-0 top-0 bottom-0 w-1 bg-[#ff2d92]';
+                
+                const icon = document.createElement('div');
+                // Blinking status dot
+                icon.innerHTML = '<div class="w-2 h-2 rounded-full bg-[#ff2d92] animate-pulse shadow-[0_0_5px_#ff2d92]"></div>';
+                
+                const text = document.createElement('span');
+                text.className = 'font-mono-tech text-[10px] text-[#ff2d92] tracking-[0.25em] uppercase font-bold mt-[1px]';
+                text.textContent = message;
+                
+                toast.appendChild(line);
+                toast.appendChild(icon);
+                toast.appendChild(text);
+                
+                this.container.appendChild(toast);
+                
+                // Trigger entry animation
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-0');
+                    toast.classList.add('translate-y-0', 'opacity-100');
+                });
+                
+                // Remove automatically
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-x-8', 'opacity-0');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+        };
+
+        // Attach event listeners
+        document.getElementById('menuBtn').addEventListener('click', () => {
+            KineticNav.toggle();
+        });
+
+        document.getElementById('contactModalClose').addEventListener('click', () => {
+            document.getElementById('contactModal').classList.remove('open');
+        });
+
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target.id === 'contactModal') {
+                document.getElementById('contactModal').classList.remove('open');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('contactModal').classList.remove('open');
+            }
+        });
+
+        document.getElementById('discoverBtn').addEventListener('click', (e) => {
+            // Ripple effect visual antes de navegar
+            const btn = e.currentTarget;
+            btn.classList.add('bg-[#ff2d92]/20');
+            setTimeout(() => btn.classList.remove('bg-[#ff2d92]/20'), 300);
+        });
+
+        document.getElementById('scrollIndicator').addEventListener('click', () => {
+            ToastController.show('Descendo para os níveis inferiores');
+        });
+
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const platform = e.currentTarget.getAttribute('data-platform');
+                ToastController.show(`Conectando ao ${platform}...`);
+            });
+        });
+
+        /* ============================================================
+           NAVEGAÇÃO CINÉTICA — adaptação vanilla JS do componente
+           sterling-gate-kinetic-navigation (React/GSAP) para o tema
+           lowping. Mesma lógica de animação: painéis deslizando,
+           links com stagger, hover revelando shapes ambientais.
+           ============================================================ */
+        const KineticNav = (function () {
+            const root        = document.getElementById('kineticNav');
+            const navWrap     = document.getElementById('navOverlay');
+            const menuContent = document.getElementById('menuContent');
+            const overlay     = document.getElementById('navOverlayBg');
+            const bgPanels    = navWrap.querySelectorAll('.backdrop-layer');
+            const menuLinks   = navWrap.querySelectorAll('.nav-link');
+            const fadeTargets = navWrap.querySelectorAll('[data-menu-fade]');
+            const closeBtn    = document.getElementById('navCloseBtn');
+            const btnTexts    = closeBtn.querySelectorAll('p');
+            const btnIcon     = closeBtn.querySelector('.menu-button-icon');
+            const particlesCanvas = document.getElementById('menuParticles');
+            const pctx        = particlesCanvas.getContext('2d');
+
+            let isOpen = false;
+            let activeTl = null;
+            let particles = [];
+            let particleRAF = null;
+
+            // Registra CustomEase uma única vez
+            try {
+                if (window.gsap && window.CustomEase) {
+                    gsap.registerPlugin(CustomEase);
+                    if (!gsap.parseEase || !gsap.parseEase('arcane')) {
+                        CustomEase.create('arcane', '0.65, 0.01, 0.05, 0.99');
+                    }
+                    gsap.defaults({ ease: 'arcane', duration: 0.7 });
+                }
+            } catch (e) {
+                console.warn('CustomEase indisponível, usando power2.out', e);
+                if (window.gsap) gsap.defaults({ ease: 'power2.out', duration: 0.7 });
+            }
+
+            /* ----------------------------------------------------------
+               Sistema de partículas sutis — pontos verdes flutuando
+               suavemente no fundo do menu. Sem reação ao hover.
+               ---------------------------------------------------------- */
+            function resizeCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                const w = particlesCanvas.offsetWidth;
+                const h = particlesCanvas.offsetHeight;
+                particlesCanvas.width  = w * dpr;
+                particlesCanvas.height = h * dpr;
+                pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                // Recria partículas proporcionais à área
+                const count = Math.max(20, Math.floor((w * h) / 18000));
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * w,
+                        y: Math.random() * h,
+                        r: Math.random() * 1.6 + 0.4,        // raio 0.4–2px
+                        vx: (Math.random() - 0.5) * 0.15,    // drift horizontal lento
+                        vy: (Math.random() - 0.5) * 0.15,    // drift vertical lento
+                        alpha: Math.random() * 0.35 + 0.05,  // opacidade muito baixa
+                        twinkle: Math.random() * Math.PI * 2 // fase do brilho
+                    });
+                }
+            }
+
+            function drawParticles() {
+                const w = particlesCanvas.offsetWidth;
+                const h = particlesCanvas.offsetHeight;
+                pctx.clearRect(0, 0, w, h);
+                const t = performance.now() * 0.001;
+
+                for (const p of particles) {
+                    // Movimento suave
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    // Wrap nas bordas
+                    if (p.x < -10) p.x = w + 10;
+                    if (p.x > w + 10) p.x = -10;
+                    if (p.y < -10) p.y = h + 10;
+                    if (p.y > h + 10) p.y = -10;
+
+                    // Cintilação sutil
+                    const a = p.alpha * (0.6 + 0.4 * Math.sin(t * 0.8 + p.twinkle));
+
+                    pctx.beginPath();
+                    pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    pctx.fillStyle = `rgba(255, 45, 146, ${a})`;
+                    pctx.fill();
+                }
+
+                particleRAF = requestAnimationFrame(drawParticles);
+            }
+
+            function startParticles() {
+                if (particleRAF) return;
+                resizeCanvas();
+                drawParticles();
+            }
+
+            function stopParticles() {
+                if (particleRAF) {
+                    cancelAnimationFrame(particleRAF);
+                    particleRAF = null;
+                }
+                pctx.clearRect(0, 0, particlesCanvas.offsetWidth, particlesCanvas.offsetHeight);
+            }
+
+            window.addEventListener('resize', () => {
+                if (isOpen) resizeCanvas();
+            });
+
+            // Estado inicial: menu fechado, painéis e links escondidos
+            function setInitialClosedState() {
+                gsap.set(navWrap, { display: 'none' });
+                gsap.set(menuContent, { xPercent: 100 });
+                gsap.set(overlay, { autoAlpha: 0 });
+                gsap.set(bgPanels, { xPercent: 101 });
+                gsap.set(menuLinks, { yPercent: 140, rotate: 10 });
+                if (fadeTargets.length) gsap.set(fadeTargets, { autoAlpha: 0, yPercent: 50 });
+                gsap.set(btnTexts, { yPercent: 0 });
+                gsap.set(btnIcon, { rotate: 0 });
+            }
+
+            function open() {
+                if (isOpen) return;
+                isOpen = true;
+                navWrap.setAttribute('data-nav', 'open');
+
+                if (activeTl) activeTl.kill();
+                activeTl = gsap.timeline()
+                    .set(navWrap, { display: 'block' })
+                    .set(menuContent, { xPercent: 0 }, '<')
+                    .fromTo(btnTexts, { yPercent: 0 }, { yPercent: -100, stagger: 0.2 })
+                    .fromTo(btnIcon, { rotate: 0 }, { rotate: 315 }, '<')
+                    .fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1 }, '<')
+                    .fromTo(bgPanels, { xPercent: 101 }, { xPercent: 0, stagger: 0.12, duration: 0.575 }, '<')
+                    .fromTo(menuLinks, { yPercent: 140, rotate: 10 }, { yPercent: 0, rotate: 0, stagger: 0.05 }, '<+=0.35');
+
+                if (fadeTargets.length) {
+                    activeTl.fromTo(fadeTargets,
+                        { autoAlpha: 0, yPercent: 50 },
+                        { autoAlpha: 1, yPercent: 0, stagger: 0.04, clearProps: 'all' },
+                        '<+=0.2'
+                    );
+                }
+
+                // Inicia partículas após o painel abrir
+                activeTl.add(() => startParticles(), '<+=0.3');
+            }
+
+            function close() {
+                if (!isOpen) return;
+                isOpen = false;
+                navWrap.setAttribute('data-nav', 'closed');
+
+                stopParticles();
+
+                if (activeTl) activeTl.kill();
+                activeTl = gsap.timeline()
+                    .to(overlay, { autoAlpha: 0 })
+                    .to(menuContent, { xPercent: 120 }, '<')
+                    .to(btnTexts, { yPercent: 0 }, '<')
+                    .to(btnIcon, { rotate: 0 }, '<')
+                    .set(navWrap, { display: 'none' });
+            }
+
+            function toggle() { isOpen ? close() : open(); }
+
+            // Fecha com Escape
+            window.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isOpen) close();
+            });
+
+            // Botão fechar e overlay
+            closeBtn.addEventListener('click', close);
+            overlay.addEventListener('click', close);
+
+            // Links do menu: navegação real; "Início" (#) apenas fecha
+            navWrap.querySelectorAll('.nav-link').forEach((link) => {
+                link.addEventListener('click', (e) => {
+                    if (link.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        close();
+                    } else {
+                        // Deixa a navegação acontecer, apenas fecha o menu
+                        close();
+                    }
+                });
+            });
+
+            // Inicializa
+            if (window.gsap) {
+                setInitialClosedState();
+            } else {
+                console.warn('GSAP não carregado — menu cinético desativado.');
+            }
+
+            return { toggle, open, close };
+        })();
+    </script>
+</body>
+</html>

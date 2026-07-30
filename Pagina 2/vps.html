@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="antialiased dark scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>lowping — VPS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syncopate:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- GSAP + CustomEase para a navegação cinética -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/CustomEase.min.js"></script>
+    <style>
+        :root {
+            --neon-green: #ff2d92;
+            --dark-green: #1a0a14;
+            --border-green: #3d1a2e;
+        }
+
+        html { overflow-x: hidden; }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: #0a0508;
+            background-image:
+                radial-gradient(ellipse at 20% 0%, rgba(255, 45, 146, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 100%, rgba(255, 45, 146, 0.05) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0508 0%, #0d050a 100%);
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-color: rgba(10, 5, 8, 0.4);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 0;
+        }
+
+        .font-syncopate { font-family: 'Syncopate', sans-serif; }
+        .font-mono-tech { font-family: 'Space Mono', monospace; }
+
+        .text-neon-glow { text-shadow: 0 0 20px rgba(255, 45, 146, 0.4); }
+
+        /* Cantos chanfrados */
+        .cut-nw-se {
+            clip-path: polygon(12px 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%, 0 12px);
+        }
+        .cut-all {
+            clip-path: polygon(12px 0, calc(100% - 12px) 0, 100% 12px, 100% calc(100% - 12px), calc(100% - 12px) 100%, 12px 100%, 0 calc(100% - 12px), 0 12px);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0a0508; }
+        ::-webkit-scrollbar-thumb { background: #3d1a2e; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ff2d92; }
+
+        /* Scroll reveal */
+        .reveal-up { opacity: 0; transform: translateY(30px); transition: opacity 0.8s cubic-bezier(0.16,1,0.3,1), transform 0.8s cubic-bezier(0.16,1,0.3,1); }
+        .reveal-up.active { opacity: 1; transform: translateY(0); }
+        .stagger-1 { transition-delay: 0.1s; }
+        .stagger-2 { transition-delay: 0.2s; }
+        .stagger-3 { transition-delay: 0.3s; }
+
+        /* ============================================================
+           NAVEGAÇÃO CINÉTICA — overlay fullscreen (tema lowping)
+           ============================================================ */
+        .kinetic-nav-root { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+        .nav-overlay-wrapper {
+            position: fixed; inset: 0; display: none;
+            pointer-events: auto;
+        }
+        .nav-overlay-wrapper .overlay {
+            position: absolute; inset: 0;
+            background: rgba(10, 5, 8, 0.6);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+        }
+        .menu-content {
+            position: absolute; top: 0; right: 0; bottom: 0;
+            width: 100%; max-width: 720px;
+            will-change: transform;
+        }
+        .menu-bg { position: absolute; inset: 0; overflow: hidden; }
+        .backdrop-layer {
+            position: absolute; inset: 0;
+            will-change: transform;
+        }
+        .backdrop-layer.first  { background: linear-gradient(135deg, #0d050a 0%, #140a14 100%); }
+        .backdrop-layer.second { background: linear-gradient(135deg, #140a14 0%, #1a0a14 60%, #0d050a 100%); }
+        .backdrop-layer.third  { background: linear-gradient(135deg, rgba(255,45,146,0.04) 0%, rgba(10,5,8,0.9) 100%); }
+
+        .menu-particles {
+            position: absolute; inset: 0; width: 100%; height: 100%;
+            z-index: 1; pointer-events: none; display: block;
+        }
+
+        .menu-content-wrapper {
+            position: relative; z-index: 2;
+            height: 100%; display: flex; flex-direction: column;
+            justify-content: center; padding: 6rem 3rem 4rem;
+        }
+        .menu-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.6rem; }
+        .menu-list-item { overflow: hidden; position: relative; }
+        .nav-link {
+            position: relative; display: flex; align-items: baseline; gap: 1.5rem;
+            width: 100%; text-decoration: none; padding: 0.4rem 0;
+            font-family: 'Syncopate', sans-serif; font-weight: 700;
+            font-size: clamp(2.2rem, 6vw, 4.5rem); line-height: 1.05;
+            letter-spacing: -0.02em; color: #e8efe8;
+            transition: color 0.3s ease, padding-left 0.3s ease;
+        }
+        .nav-link:hover { color: #ff2d92; padding-left: 1.2rem; }
+        .nav-link.active { color: #ff2d92; }
+        .nav-link-text { margin: 0; position: relative; display: inline-block; }
+        .nav-link-hover-bg {
+            position: absolute; left: 0; bottom: 0.35rem; height: 2px; width: 0;
+            background: linear-gradient(90deg, #ff2d92, transparent);
+            transition: width 0.4s cubic-bezier(0.65,0.05,0,1);
+        }
+        .nav-link:hover .nav-link-hover-bg { width: 100%; }
+
+        .nav-link-index {
+            font-family: 'Space Mono', monospace; font-size: 0.85rem;
+            color: #8a4a6a; letter-spacing: 0.3em; flex-shrink: 0;
+            line-height: 1; min-width: 2.5em;
+        }
+
+        .nav-close-btn {
+            position: absolute; top: 2.2rem; right: 2.5rem;
+            display: inline-flex; align-items: center; gap: 0.8rem;
+            background: transparent; border: 1px solid rgba(255,45,146,0.3);
+            color: #e8efe8; padding: 0.7rem 1.2rem; cursor: pointer;
+            font-family: 'Space Mono', monospace; font-size: 0.7rem;
+            letter-spacing: 0.3em; text-transform: uppercase;
+            transition: all 0.3s ease; z-index: 5;
+        }
+        .nav-close-btn:hover { border-color: #ff2d92; color: #ff2d92; box-shadow: 0 0 20px rgba(255,45,146,0.2); }
+        .menu-button-text { overflow: hidden; position: relative; height: 1em; display: inline-block; }
+        .menu-button-text p { margin: 0; transition: none; }
+        .icon-wrap { display: inline-flex; width: 14px; height: 14px; }
+        .menu-button-icon { transition: none; }
+
+        .menu-footer {
+            position: absolute; left: 3rem; bottom: 2.5rem; right: 3rem;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            font-family: 'Space Mono', monospace; font-size: 0.65rem;
+            letter-spacing: 0.3em; color: #8a4a6a; text-transform: uppercase;
+            z-index: 3;
+        }
+        .menu-footer .mf-label { color: #8a7f8a; }
+        .menu-footer a { color: #ff2d92; text-decoration: none; transition: opacity 0.3s; }
+        .menu-footer a:hover { opacity: 0.7; }
+
+        #ui-toast-container { z-index: 70 !important; }
+
+        /* ============================================================
+           MODAL DE CONTATO
+           ============================================================ */
+        .contact-modal-overlay {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(10, 5, 8, 0.8);
+            backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .contact-modal-overlay.open { display: flex; opacity: 1; }
+        .contact-modal {
+            background: #0d0a0d;
+            border: 1px solid #3d1a2e;
+            clip-path: polygon(16px 0, calc(100% - 16px) 0, 100% 16px, 100% calc(100% - 16px), calc(100% - 16px) 100%, 16px 100%, 0 calc(100% - 16px), 0 16px);
+            max-width: 460px; width: 90%;
+            padding: 2.5rem;
+            position: relative;
+            transform: scale(0.9) translateY(20px);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .contact-modal-overlay.open .contact-modal { transform: scale(1) translateY(0); }
+        .contact-modal-close {
+            position: absolute; top: 1rem; right: 1rem;
+            background: transparent; border: 1px solid #3d1a2e;
+            color: #8a7f8a; width: 32px; height: 32px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        .contact-modal-close:hover { border-color: #ff2d92; color: #ff2d92; }
+        .contact-channel {
+            display: flex; align-items: center; gap: 1rem;
+            padding: 1.25rem; border: 1px solid #3d1a2e;
+            margin-bottom: 0.75rem; cursor: pointer;
+            transition: all 0.3s ease; text-decoration: none;
+            clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+        }
+        .contact-channel:hover {
+            border-color: #ff2d92; background: rgba(255, 45, 146, 0.05);
+            transform: translateX(4px);
+        }
+        .contact-channel-icon {
+            width: 44px; height: 44px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid #3d1a2e; font-size: 22px;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+            transition: all 0.3s ease;
+        }
+        .contact-channel:hover .contact-channel-icon { border-color: #ff2d92; color: #ff2d92; }
+
+        /* ============================================================
+           MINIMAL DATA TABLE — VPS
+           ============================================================ */
+        .vps-table {
+            width: 100%;
+            min-width: 700px;
+            border-collapse: collapse;
+            font-family: 'Space Mono', monospace;
+        }
+        .vps-table thead th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #ff6bb5;
+            padding: 1.1rem 1.25rem;
+            border-bottom: 1px solid #3d1a2e;
+            white-space: nowrap;
+        }
+        .vps-table thead th:first-child { padding-left: 1.5rem; }
+        .vps-table tbody tr {
+            transition: background 0.25s ease, border-color 0.25s ease;
+            border-bottom: 1px solid #1a0a14;
+        }
+        .vps-table tbody tr:hover {
+            background: rgba(255, 45, 146, 0.04);
+            border-bottom-color: #ff2d92;
+        }
+        .vps-table tbody tr:hover .vps-plan-name { color: #ff2d92; }
+        .vps-table tbody tr:hover .vps-spec-value { color: #ff6bb5; }
+        .vps-table tbody td {
+            padding: 1.4rem 1.25rem;
+            font-size: 14px;
+            color: #e8e0e8;
+            white-space: nowrap;
+        }
+        .vps-table tbody td:first-child { padding-left: 1.5rem; }
+        .vps-plan-name {
+            font-family: 'Syncopate', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #ffffff;
+            transition: color 0.25s ease;
+        }
+        .vps-spec {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: #c8bcc8;
+        }
+        .vps-spec i { font-size: 16px; color: #ff2d92; opacity: 1; }
+        .vps-spec-value {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 15px;
+            color: #ffffff;
+            transition: color 0.25s ease;
+        }
+        .vps-spec-unit {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px;
+            color: #8a7f8a;
+            font-weight: 400;
+            margin-left: 0.15rem;
+        }
+        .vps-price {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            font-size: 17px;
+            color: #ff2d92;
+        }
+        .vps-price span { font-size: 11px; color: #8a7f8a; font-weight: 400; }
+        .vps-action {
+            font-family: 'Space Mono', monospace;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #ff2d92;
+            border: 1px solid #ff2d92;
+            padding: 0.7rem 1.4rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            background: rgba(255, 45, 146, 0.08);
+            text-decoration: none;
+            display: inline-block;
+            clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+        }
+        .vps-action:hover {
+            border-color: #ff2d92;
+            color: #ffffff;
+            background: #ff2d92;
+            box-shadow: 0 0 20px rgba(255, 45, 146, 0.3);
+        }
+        .vps-badge {
+            display: inline-block;
+            font-family: 'Space Mono', monospace;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #ff2d92;
+            border: 1px solid #ff2d92;
+            padding: 0.15rem 0.5rem;
+            margin-left: 0.5rem;
+            clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+        }
+        /* Responsividade da tabela */
+        .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        .table-scroll::-webkit-scrollbar { height: 6px; }
+        .table-scroll::-webkit-scrollbar-track { background: #0a0508; }
+        .table-scroll::-webkit-scrollbar-thumb { background: #3d1a2e; border-radius: 3px; }
+
+        /* Status indicator */
+        .status-dot {
+            display: inline-block;
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #ff2d92;
+            box-shadow: 0 0 8px rgba(255, 45, 146, 0.6);
+            animation: status-pulse 2s ease-in-out infinite;
+        }
+        @keyframes status-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        /* ============================================================
+           FAIXA DE PROMOÇÃO
+           ============================================================ */
+        .promo-bar {
+            position: fixed; top: 0; left: 0; right: 0; z-index: 55;
+            background: linear-gradient(90deg, #0d050a 0%, #1a0a14 50%, #0d050a 100%);
+            border-bottom: 1px solid #ff2d92;
+            overflow: hidden;
+        }
+        .promo-bar::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,45,146,0.08), transparent);
+            animation: promo-sweep 4s ease-in-out infinite;
+        }
+        @keyframes promo-sweep {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .promo-bar-inner {
+            position: relative; z-index: 1;
+            max-width: 80rem; margin: 0 auto;
+            padding: 0.5rem 1.5rem;
+            display: flex; align-items: center; justify-content: center; gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+        .promo-text {
+            font-family: 'Space Mono', monospace;
+            font-size: 11px; font-weight: 400;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: #c8bcc8;
+            white-space: nowrap;
+        }
+        .promo-text strong { color: #ff2d92; font-weight: 700; }
+        .promo-text .promo-pct { font-size: 13px; font-weight: 700; }
+        .promo-code-btn {
+            display: inline-flex; align-items: center; gap: 0.5rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 11px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase;
+            color: #ff2d92;
+            border: 1px solid #ff2d92;
+            background: rgba(255, 45, 146, 0.08);
+            padding: 0.25rem 0.7rem;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+        }
+        .promo-code-btn:hover {
+            background: #ff2d92; color: #ffffff;
+            box-shadow: 0 0 15px rgba(255, 45, 146, 0.3);
+        }
+        .promo-code-btn .code-text { letter-spacing: 0.1em; }
+        .promo-code-btn .copy-icon { font-size: 13px; opacity: 0.8; }
+        .promo-code-btn.copied {
+            background: #ff2d92; color: #ffffff;
+        }
+        .promo-code-btn.copied .copy-icon::before { content: '\e3c9'; }
+        .promo-close {
+            background: transparent; border: none;
+            color: #8a7f8a; cursor: pointer;
+            font-size: 14px; padding: 0.2rem;
+            transition: color 0.2s ease;
+            margin-left: 0.5rem;
+        }
+        .promo-close:hover { color: #ff2d92; }
+        body.promo-visible { padding-top: 40px; }
+        body.promo-hidden .promo-bar { display: none; }
+    </style>
+</head>
+<body class="text-white min-h-screen relative">
+
+    <!-- Canvas de partículas de fundo -->
+    <canvas id="bgParticles" class="fixed inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
+
+    <!-- ============================================================
+         FAIXA DE PROMOÇÃO
+         ============================================================ -->
+    <div class="promo-bar" id="promoBar">
+        <div class="promo-bar-inner">
+            <i class="ph-fill ph-tag text-[#ff2d92] text-sm"></i>
+            <span class="promo-text">Promoção de Inverno · <strong class="promo-pct">15% OFF</strong> Recorrente</span>
+            <button class="promo-code-btn" id="promoCodeBtn" data-code="PROMO2026">
+                <span class="code-text">PROMO2026</span>
+                <i class="ph ph-copy copy-icon"></i>
+            </button>
+            <button class="promo-close" id="promoClose" aria-label="Fechar promoção">
+                <i class="ph ph-x"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         NAVBAR
+         ============================================================ -->
+    <header class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0508]/80 backdrop-blur-md transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <button id="menuBtn" class="text-white hover:text-[#ff2d92] transition-colors focus:outline-none focus:ring-1 focus:ring-[#ff2d92] focus:ring-offset-4 focus:ring-offset-transparent flex items-center group rounded-sm p-1" aria-label="Abrir Menu">
+                <div class="w-6 h-[2px] bg-current relative before:absolute before:-top-2 before:w-8 before:h-[2px] before:bg-current before:right-0 after:absolute after:top-2 after:w-4 after:h-[2px] after:bg-current after:left-0 group-hover:before:w-6 group-hover:after:w-6 transition-all duration-300"></div>
+            </button>
+
+            <div class="font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
+                lowping
+            </div>
+
+            <div class="flex items-center gap-3">
+                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                    PAINEL
+                </a>
+                <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                    FINANCEIRO
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- ============================================================
+         NAVEGAÇÃO CINÉTICA — Overlay fullscreen
+         ============================================================ -->
+    <div class="kinetic-nav-root" id="kineticNav">
+      <div data-nav="closed" class="nav-overlay-wrapper" id="navOverlay">
+        <div class="overlay" id="navOverlayBg"></div>
+        <nav class="menu-content" id="menuContent">
+          <div class="menu-bg">
+            <div class="backdrop-layer first"></div>
+            <div class="backdrop-layer second"></div>
+            <div class="backdrop-layer third"></div>
+            <canvas class="menu-particles" id="menuParticles"></canvas>
+          </div>
+
+          <div class="menu-content-wrapper">
+            <ul class="menu-list" id="menuList">
+              <li class="menu-list-item" data-shape="1">
+                <a href="../design-export/Page_3.html" class="nav-link w-inline-block">
+                  <span class="nav-link-index">00</span>
+                  <span class="nav-link-text">Início</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+              <li class="menu-list-item" data-shape="2">
+                <a href="games.html" class="nav-link w-inline-block">
+                  <span class="nav-link-index">01</span>
+                  <span class="nav-link-text">Games</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+              <li class="menu-list-item" data-shape="3">
+                <a href="vps.html" class="nav-link w-inline-block active">
+                  <span class="nav-link-index">02</span>
+                  <span class="nav-link-text">Vps</span>
+                  <div class="nav-link-hover-bg"></div>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <button role="button" class="nav-close-btn" id="navCloseBtn" aria-label="Fechar menu">
+            <div class="menu-button-text">
+              <p class="p-large">Menu</p>
+              <p class="p-large">Fechar</p>
+            </div>
+            <div class="icon-wrap">
+              <svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 16 16" fill="none" class="menu-button-icon">
+                <path d="M7.33333 16L7.33333 -3.2055e-07L8.66667 -3.78832e-07L8.66667 16L7.33333 16Z" fill="currentColor"></path>
+                <path d="M16 8.66667L-2.62269e-07 8.66667L-3.78832e-07 7.33333L16 7.33333L16 8.66667Z" fill="currentColor"></path>
+              </svg>
+            </div>
+          </button>
+
+          <div class="menu-footer">
+            <div>
+              <div class="mf-label">Piltover · Zaun</div>
+              <div>2026 — lowping</div>
+            </div>
+            <div style="text-align:right">
+              <div class="mf-label">Social</div>
+              <a href="#">@lowping</a>
+            </div>
+          </div>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div id="ui-toast-container" class="fixed bottom-8 right-8 z-50 flex flex-col items-end gap-3 pointer-events-none"></div>
+
+    <!-- Modal de Contato -->
+    <div class="contact-modal-overlay" id="contactModal">
+        <div class="contact-modal">
+            <button class="contact-modal-close" id="contactModalClose" aria-label="Fechar">
+                <i class="ph ph-x"></i>
+            </button>
+            <div class="text-center mb-6">
+                <div class="font-mono-tech text-[10px] tracking-[0.3em] text-[#ff2d92] uppercase mb-2">Fale Conosco</div>
+                <h3 class="font-syncopate text-2xl text-white uppercase tracking-wider">Contato</h3>
+                <p class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-2">Escolha um canal</p>
+            </div>
+            <a href="https://discord.gg/apFUEw4zyv" target="_blank" rel="noopener noreferrer" class="contact-channel">
+                <div class="contact-channel-icon text-white">
+                    <i class="ph-fill ph-discord-logo"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="font-mono-tech text-sm text-white font-bold uppercase tracking-wider">Discord</div>
+                    <div class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-0.5">Suporte e comunidade</div>
+                </div>
+                <i class="ph ph-arrow-up-right text-lg text-[#8a7f8a]"></i>
+            </a>
+            <a href="https://financeiro.lowping.com.br/submitticket.php" target="_blank" rel="noopener noreferrer" class="contact-channel">
+                <div class="contact-channel-icon text-white">
+                    <i class="ph ph-ticket"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="font-mono-tech text-sm text-white font-bold uppercase tracking-wider">Ticket</div>
+                    <div class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest mt-0.5">Suporte formal e acompanhamento</div>
+                </div>
+                <i class="ph ph-arrow-up-right text-lg text-[#8a7f8a]"></i>
+            </a>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         CONTEÚDO PRINCIPAL
+         ============================================================ -->
+    <main class="relative z-10 pb-20" id="mainContent">
+        <!-- HERO -->
+        <section class="max-w-7xl mx-auto px-6 mb-16 reveal-up">
+            <h1 class="font-syncopate text-4xl md:text-6xl text-white uppercase tracking-wide mb-4">
+                Servidores <span class="text-[#ff2d92] text-neon-glow">VPS</span>
+            </h1>
+            <p class="font-mono-tech text-xs text-[#8a7f8a] tracking-widest uppercase max-w-2xl leading-relaxed">
+                Infraestrutura dedicada com NVMe de alta performance, proteção DDoS e instalação instantânea.
+            </p>
+        </section>
+
+        <!-- MINIMAL DATA TABLE -->
+        <section class="max-w-7xl mx-auto px-6 mb-16 reveal-up stagger-1">
+            <div class="border border-[#3d1a2e] cut-all bg-[#0a0508]/60 backdrop-blur-sm">
+                <!-- Cabeçalho da tabela -->
+                <div class="flex items-center justify-between px-6 py-4 border-b border-[#3d1a2e]">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-hard-drives text-lg text-[#ff2d92]"></i>
+                        <h2 class="font-mono-tech text-xs text-white uppercase tracking-[0.2em] font-bold">Planos VPS</h2>
+                    </div>
+                    <div class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">Mensal · BRL</div>
+                </div>
+
+                <!-- Tabela -->
+                <div class="table-scroll">
+                    <table class="vps-table">
+                        <thead>
+                            <tr>
+                                <th>Plano</th>
+                                <th>CPU</th>
+                                <th>RAM</th>
+                                <th>Armazenamento</th>
+                                <th>Rede</th>
+                                <th>Preço</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="vps-plan-name">Starter</span></td>
+                                <td><span class="vps-spec"><i class="ph ph-cpu"></i><span class="vps-spec-value">2</span><span class="vps-spec-unit">vCore</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-memory"></i><span class="vps-spec-value">4</span><span class="vps-spec-unit">GB</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-hard-drive"></i><span class="vps-spec-value">80</span><span class="vps-spec-unit">GB NVMe</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-wifi-high"></i><span class="vps-spec-value">1</span><span class="vps-spec-unit">Gbps</span></span></td>
+                                <td><span class="vps-price">R$ 29<span>/mês</span></span></td>
+                                <td><a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="vps-action">Contratar</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="vps-plan-name">Basic</span></td>
+                                <td><span class="vps-spec"><i class="ph ph-cpu"></i><span class="vps-spec-value">4</span><span class="vps-spec-unit">vCore</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-memory"></i><span class="vps-spec-value">8</span><span class="vps-spec-unit">GB</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-hard-drive"></i><span class="vps-spec-value">160</span><span class="vps-spec-unit">GB NVMe</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-wifi-high"></i><span class="vps-spec-value">1</span><span class="vps-spec-unit">Gbps</span></span></td>
+                                <td><span class="vps-price">R$ 59<span>/mês</span></span></td>
+                                <td><a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="vps-action">Contratar</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="vps-plan-name">Pro</span><span class="vps-badge">Popular</span></td>
+                                <td><span class="vps-spec"><i class="ph ph-cpu"></i><span class="vps-spec-value">6</span><span class="vps-spec-unit">vCore</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-memory"></i><span class="vps-spec-value">16</span><span class="vps-spec-unit">GB</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-hard-drive"></i><span class="vps-spec-value">320</span><span class="vps-spec-unit">GB NVMe</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-wifi-high"></i><span class="vps-spec-value">1</span><span class="vps-spec-unit">Gbps</span></span></td>
+                                <td><span class="vps-price">R$ 99<span>/mês</span></span></td>
+                                <td><a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="vps-action">Contratar</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="vps-plan-name">Business</span></td>
+                                <td><span class="vps-spec"><i class="ph ph-cpu"></i><span class="vps-spec-value">8</span><span class="vps-spec-unit">vCore</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-memory"></i><span class="vps-spec-value">32</span><span class="vps-spec-unit">GB</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-hard-drive"></i><span class="vps-spec-value">640</span><span class="vps-spec-unit">GB NVMe</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-wifi-high"></i><span class="vps-spec-value">2</span><span class="vps-spec-unit">Gbps</span></span></td>
+                                <td><span class="vps-price">R$ 199<span>/mês</span></span></td>
+                                <td><a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="vps-action">Contratar</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="vps-plan-name">Enterprise</span></td>
+                                <td><span class="vps-spec"><i class="ph ph-cpu"></i><span class="vps-spec-value">16</span><span class="vps-spec-unit">vCore</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-memory"></i><span class="vps-spec-value">64</span><span class="vps-spec-unit">GB</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-hard-drive"></i><span class="vps-spec-value">1.2</span><span class="vps-spec-unit">TB NVMe</span></span></td>
+                                <td><span class="vps-spec"><i class="ph ph-wifi-high"></i><span class="vps-spec-value">5</span><span class="vps-spec-unit">Gbps</span></span></td>
+                                <td><span class="vps-price">R$ 399<span>/mês</span></span></td>
+                                <td><a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="vps-action">Contratar</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- RECURSOS INCLUSOS -->
+        <section class="max-w-7xl mx-auto px-6 mb-16 reveal-up stagger-2">
+            <h3 class="font-mono-tech text-xs text-[#ff2d92] uppercase tracking-[0.2em] text-neon-glow mb-8 text-center">Recursos Inclusos em Todos os Planos</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div class="text-center group">
+                    <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center border border-[#3d1a2e] cut-all group-hover:border-[#ff2d92] transition-colors">
+                        <i class="ph ph-shield-check text-2xl text-[#ff2d92]"></i>
+                    </div>
+                    <h4 class="font-mono-tech text-xs uppercase tracking-widest text-[#8a7f8a] mb-2 group-hover:text-white transition-colors">Proteção DDoS</h4>
+                    <p class="text-sm text-[#8a7f8a]/70 leading-relaxed">Mitigação automática contra ataques.</p>
+                </div>
+                <div class="text-center group">
+                    <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center border border-[#3d1a2e] cut-all group-hover:border-[#ff2d92] transition-colors">
+                        <i class="ph ph-lightning text-2xl text-[#ff2d92]"></i>
+                    </div>
+                    <h4 class="font-mono-tech text-xs uppercase tracking-widest text-[#8a7f8a] mb-2 group-hover:text-white transition-colors">Instalação Instantânea</h4>
+                    <p class="text-sm text-[#8a7f8a]/70 leading-relaxed">Servidor ativo em segundos.</p>
+                </div>
+                <div class="text-center group">
+                    <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center border border-[#3d1a2e] cut-all group-hover:border-[#ff2d92] transition-colors">
+                        <i class="ph ph-headset text-2xl text-[#ff2d92]"></i>
+                    </div>
+                    <h4 class="font-mono-tech text-xs uppercase tracking-widest text-[#8a7f8a] mb-2 group-hover:text-white transition-colors">Suporte Prioritário</h4>
+                    <p class="text-sm text-[#8a7f8a]/70 leading-relaxed">Equipe especializada disponível todos os dias úteis, das 9h às 18h.</p>
+                </div>
+                <div class="text-center group">
+                    <div class="w-14 h-14 mx-auto mb-4 flex items-center justify-center border border-[#3d1a2e] cut-all group-hover:border-[#ff2d92] transition-colors">
+                        <i class="ph ph-archive-tray text-2xl text-[#ff2d92]"></i>
+                    </div>
+                    <h4 class="font-mono-tech text-xs uppercase tracking-widest text-[#8a7f8a] mb-2 group-hover:text-white transition-colors">Backups Automáticos</h4>
+                    <p class="text-sm text-[#8a7f8a]/70 leading-relaxed">Backups diários inclusos para proteger o que é mais importante.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA FINAL -->
+        <section class="relative py-20 overflow-hidden reveal-up stagger-3">
+            <span class="font-syncopate text-[14vw] font-bold text-white/[0.015] tracking-tighter mix-blend-plus-lighter whitespace-nowrap absolute inset-0 flex items-center justify-center pointer-events-none">SERVIDOR</span>
+            <div class="relative z-10 text-center max-w-2xl mx-auto px-6">
+                <h2 class="font-syncopate text-4xl md:text-6xl text-[#ff2d92] uppercase tracking-wide mb-4 text-neon-glow drop-shadow-xl">Pronto Para Começar?</h2>
+                <p class="font-mono-tech text-xs text-[#8a7f8a] tracking-widest uppercase mb-8 leading-relaxed">
+                    Configure seu servidor em minutos. Sem taxas ocultas.
+                </p>
+                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" id="ctaBtn" class="inline-flex items-center gap-3 bg-[#ff2d92] text-black font-mono-tech text-xs font-bold tracking-[0.2em] uppercase px-8 py-4 hover:bg-[#ff6bb5] transition-all cut-nw-se">
+                    <span class="relative z-10">Começar Agora</span>
+                    <i class="ph ph-arrow-right text-base"></i>
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="relative z-10 border-t border-[#3d1a2e] bg-[#050208]">
+        <div class="max-w-7xl mx-auto px-6 py-6 flex flex-col md:flex-row items-center justify-between gap-4 font-mono-tech text-[10px] uppercase tracking-widest text-[#8a7f8a]/50">
+            <div class="flex items-center space-x-2">
+                <span class="font-syncopate text-lg text-white font-bold tracking-wider">lowping</span>
+            </div>
+            <div>© 2026 lowping. TODOS OS DIREITOS RESERVADOS.</div>
+            <div class="flex items-center space-x-1">
+                <span>FEITO PARA JOGADORES</span>
+                <i class="ph-fill ph-heart text-[#ff2d92] ml-1"></i>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        /* ============================================================
+           PARTÍCULAS DE FUNDO
+           ============================================================ */
+        const BgParticles = (function () {
+            const canvas = document.getElementById('bgParticles');
+            const ctx = canvas.getContext('2d');
+            let particles = [];
+            let raf = null;
+
+            const LINK_DIST = 130;
+
+            function resize() {
+                const dpr = window.devicePixelRatio || 1;
+                canvas.width  = window.innerWidth  * dpr;
+                canvas.height = window.innerHeight * dpr;
+                canvas.style.width  = window.innerWidth  + 'px';
+                canvas.style.height = window.innerHeight + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.max(30, Math.floor((window.innerWidth * window.innerHeight) / 22000));
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * window.innerWidth,
+                        y: Math.random() * window.innerHeight,
+                        r: Math.random() * 1.4 + 0.5,
+                        vx: (Math.random() - 0.5) * 0.08,
+                        vy: -(Math.random() * 0.25 + 0.05),
+                        alpha: Math.random() * 0.3 + 0.08,
+                        twinkle: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function draw() {
+                ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                const t = performance.now() * 0.001;
+
+                for (const p of particles) {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    if (p.y < -10) { p.y = window.innerHeight + 10; p.x = Math.random() * window.innerWidth; }
+                    if (p.x < -10) p.x = window.innerWidth + 10;
+                    if (p.x > window.innerWidth + 10) p.x = -10;
+
+                    const a = p.alpha * (0.6 + 0.4 * Math.sin(t * 0.6 + p.twinkle));
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = `rgba(255, 45, 146, ${a})`;
+                    ctx.fill();
+                }
+
+                for (let i = 0; i < particles.length; i++) {
+                    for (let j = i + 1; j < particles.length; j++) {
+                        const dx = particles[i].x - particles[j].x;
+                        const dy = particles[i].y - particles[j].y;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        if (dist < LINK_DIST) {
+                            const a = (1 - dist / LINK_DIST) * 0.08;
+                            ctx.beginPath();
+                            ctx.moveTo(particles[i].x, particles[i].y);
+                            ctx.lineTo(particles[j].x, particles[j].y);
+                            ctx.strokeStyle = `rgba(255, 45, 146, ${a})`;
+                            ctx.lineWidth = 1;
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                raf = requestAnimationFrame(draw);
+            }
+
+            function start() { if (raf) return; resize(); draw(); }
+            function stop() { if (raf) { cancelAnimationFrame(raf); raf = null; } ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+
+            window.addEventListener('resize', resize);
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden) stop(); else start();
+            });
+
+            return { start, stop };
+        })();
+
+        BgParticles.start();
+
+        /* ============================================================
+           TOAST SYSTEM
+           ============================================================ */
+        const ToastController = {
+            container: document.getElementById('ui-toast-container'),
+            show(message) {
+                const toast = document.createElement('div');
+                toast.className = 'bg-[#0d050a]/95 border border-[#ff2d92] shadow-[0_0_20px_rgba(255,45,146,0.15)] rounded-sm px-5 py-3.5 transform translate-y-4 opacity-0 transition-all duration-400 ease-out flex items-center gap-4 backdrop-blur-md relative overflow-hidden pointer-events-auto min-w-[240px]';
+                const line = document.createElement('div');
+                line.className = 'absolute left-0 top-0 bottom-0 w-1 bg-[#ff2d92]';
+                const icon = document.createElement('div');
+                icon.innerHTML = '<div class="w-2 h-2 rounded-full bg-[#ff2d92] animate-pulse shadow-[0_0_5px_#ff2d92]"></div>';
+                const text = document.createElement('span');
+                text.className = 'font-mono-tech text-[10px] text-[#ff2d92] tracking-[0.25em] uppercase font-bold mt-[1px]';
+                text.textContent = message;
+                toast.appendChild(line); toast.appendChild(icon); toast.appendChild(text);
+                this.container.appendChild(toast);
+                requestAnimationFrame(() => {
+                    toast.classList.remove('translate-y-4', 'opacity-0');
+                    toast.classList.add('translate-y-0', 'opacity-100');
+                });
+                setTimeout(() => {
+                    toast.classList.remove('translate-y-0', 'opacity-100');
+                    toast.classList.add('translate-x-8', 'opacity-0');
+                    setTimeout(() => toast.remove(), 400);
+                }, 3000);
+            }
+        };
+
+        /* ============================================================
+           NAVEGAÇÃO CINÉTICA
+           ============================================================ */
+        const KineticNav = (function () {
+            const navWrap     = document.getElementById('navOverlay');
+            const menuContent = document.getElementById('menuContent');
+            const overlay     = document.getElementById('navOverlayBg');
+            const bgPanels    = navWrap.querySelectorAll('.backdrop-layer');
+            const menuLinks   = navWrap.querySelectorAll('.nav-link');
+            const closeBtn    = document.getElementById('navCloseBtn');
+            const btnTexts    = closeBtn.querySelectorAll('p');
+            const btnIcon     = closeBtn.querySelector('.menu-button-icon');
+            const particlesCanvas = document.getElementById('menuParticles');
+            const pctx        = particlesCanvas.getContext('2d');
+
+            let isOpen = false;
+            let activeTl = null;
+            let particles = [];
+            let particleRAF = null;
+
+            try {
+                if (window.gsap && window.CustomEase) {
+                    gsap.registerPlugin(CustomEase);
+                    if (!gsap.parseEase || !gsap.parseEase('arcane')) {
+                        CustomEase.create('arcane', '0.65, 0.01, 0.05, 0.99');
+                    }
+                    gsap.defaults({ ease: 'arcane', duration: 0.7 });
+                }
+            } catch (e) {
+                if (window.gsap) gsap.defaults({ ease: 'power2.out', duration: 0.7 });
+            }
+
+            function resizeCanvas() {
+                const dpr = window.devicePixelRatio || 1;
+                const w = particlesCanvas.offsetWidth;
+                const h = particlesCanvas.offsetHeight;
+                particlesCanvas.width  = w * dpr;
+                particlesCanvas.height = h * dpr;
+                pctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.max(20, Math.floor((w * h) / 18000));
+                particles = [];
+                for (let i = 0; i < count; i++) {
+                    particles.push({
+                        x: Math.random() * w, y: Math.random() * h,
+                        r: Math.random() * 1.6 + 0.4,
+                        vx: (Math.random() - 0.5) * 0.15, vy: (Math.random() - 0.5) * 0.15,
+                        alpha: Math.random() * 0.35 + 0.05, twinkle: Math.random() * Math.PI * 2
+                    });
+                }
+            }
+
+            function drawParticles() {
+                const w = particlesCanvas.offsetWidth;
+                const h = particlesCanvas.offsetHeight;
+                pctx.clearRect(0, 0, w, h);
+                const t = performance.now() * 0.001;
+                for (const p of particles) {
+                    p.x += p.vx; p.y += p.vy;
+                    if (p.x < -10) p.x = w + 10; if (p.x > w + 10) p.x = -10;
+                    if (p.y < -10) p.y = h + 10; if (p.y > h + 10) p.y = -10;
+                    const a = p.alpha * (0.6 + 0.4 * Math.sin(t * 0.8 + p.twinkle));
+                    pctx.beginPath();
+                    pctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    pctx.fillStyle = `rgba(255, 45, 146, ${a})`;
+                    pctx.fill();
+                }
+                particleRAF = requestAnimationFrame(drawParticles);
+            }
+
+            function startParticles() { if (particleRAF) return; resizeCanvas(); drawParticles(); }
+            function stopParticles() {
+                if (particleRAF) { cancelAnimationFrame(particleRAF); particleRAF = null; }
+                pctx.clearRect(0, 0, particlesCanvas.offsetWidth, particlesCanvas.offsetHeight);
+            }
+
+            window.addEventListener('resize', () => { if (isOpen) resizeCanvas(); });
+
+            function setInitialClosedState() {
+                gsap.set(navWrap, { display: 'none' });
+                gsap.set(menuContent, { xPercent: 100 });
+                gsap.set(overlay, { autoAlpha: 0 });
+                gsap.set(bgPanels, { xPercent: 101 });
+                gsap.set(menuLinks, { yPercent: 140, rotate: 10 });
+                gsap.set(btnTexts, { yPercent: 0 });
+                gsap.set(btnIcon, { rotate: 0 });
+            }
+
+            function open() {
+                if (isOpen) return;
+                isOpen = true;
+                navWrap.setAttribute('data-nav', 'open');
+                if (activeTl) activeTl.kill();
+                activeTl = gsap.timeline()
+                    .set(navWrap, { display: 'block' })
+                    .set(menuContent, { xPercent: 0 }, '<')
+                    .fromTo(btnTexts, { yPercent: 0 }, { yPercent: -100, stagger: 0.2 })
+                    .fromTo(btnIcon, { rotate: 0 }, { rotate: 315 }, '<')
+                    .fromTo(overlay, { autoAlpha: 0 }, { autoAlpha: 1 }, '<')
+                    .fromTo(bgPanels, { xPercent: 101 }, { xPercent: 0, stagger: 0.12, duration: 0.575 }, '<')
+                    .fromTo(menuLinks, { yPercent: 140, rotate: 10 }, { yPercent: 0, rotate: 0, stagger: 0.05 }, '<+=0.35');
+                activeTl.add(() => startParticles(), '<+=0.3');
+            }
+
+            function close() {
+                if (!isOpen) return;
+                isOpen = false;
+                navWrap.setAttribute('data-nav', 'closed');
+                stopParticles();
+                if (activeTl) activeTl.kill();
+                activeTl = gsap.timeline()
+                    .to(overlay, { autoAlpha: 0 })
+                    .to(menuContent, { xPercent: 120 }, '<')
+                    .to(btnTexts, { yPercent: 0 }, '<')
+                    .to(btnIcon, { rotate: 0 }, '<')
+                    .set(navWrap, { display: 'none' });
+            }
+
+            function toggle() { isOpen ? close() : open(); }
+
+            window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && isOpen) close(); });
+            closeBtn.addEventListener('click', close);
+            overlay.addEventListener('click', close);
+
+            navWrap.querySelectorAll('.nav-link').forEach((link) => {
+                link.addEventListener('click', () => {
+                    close();
+                });
+            });
+
+            if (window.gsap) setInitialClosedState();
+            else console.warn('GSAP não carregado — menu cinético desativado.');
+
+            return { toggle, open, close };
+        })();
+
+        /* ============================================================
+           EVENT LISTENERS
+           ============================================================ */
+        document.getElementById('menuBtn').addEventListener('click', () => KineticNav.toggle());
+
+        document.getElementById('contactModalClose').addEventListener('click', () => {
+            document.getElementById('contactModal').classList.remove('open');
+        });
+
+        document.getElementById('contactModal').addEventListener('click', (e) => {
+            if (e.target.id === 'contactModal') {
+                document.getElementById('contactModal').classList.remove('open');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.getElementById('contactModal').classList.remove('open');
+            }
+        });
+
+        document.getElementById('ctaBtn').addEventListener('click', () => ToastController.show('Redirecionando para o checkout...'));
+
+        /* ============================================================
+           FAIXA DE PROMOÇÃO — copiar código + fechar
+           ============================================================ */
+        const promoBar = document.getElementById('promoBar');
+        const promoCodeBtn = document.getElementById('promoCodeBtn');
+        const promoClose = document.getElementById('promoClose');
+        const navbarEl = document.getElementById('navbar');
+        const mainContent = document.getElementById('mainContent');
+
+        function syncPromoLayout() {
+            if (promoBar.style.display === 'none') {
+                navbarEl.style.top = '0px';
+                mainContent.style.paddingTop = '8rem';
+            } else {
+                const h = promoBar.offsetHeight;
+                navbarEl.style.top = h + 'px';
+                mainContent.style.paddingTop = (h + 128) + 'px';
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+            document.body.appendChild(ta); ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+        }
+
+        promoCodeBtn.addEventListener('click', () => {
+            const code = promoCodeBtn.getAttribute('data-code');
+            const showCopied = () => {
+                promoCodeBtn.classList.add('copied');
+                const original = promoCodeBtn.querySelector('.code-text').textContent;
+                promoCodeBtn.querySelector('.code-text').textContent = 'COPIADO!';
+                promoCodeBtn.querySelector('.copy-icon').className = 'ph ph-check copy-icon';
+                ToastController.show(`Código ${code} copiado!`);
+                setTimeout(() => {
+                    promoCodeBtn.classList.remove('copied');
+                    promoCodeBtn.querySelector('.code-text').textContent = original;
+                    promoCodeBtn.querySelector('.copy-icon').className = 'ph ph-copy copy-icon';
+                }, 2500);
+            };
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(code).then(showCopied).catch(() => {
+                    fallbackCopy(code); showCopied();
+                });
+            } else {
+                fallbackCopy(code); showCopied();
+            }
+        });
+
+        promoClose.addEventListener('click', () => {
+            promoBar.style.display = 'none';
+            syncPromoLayout();
+        });
+
+        window.addEventListener('resize', syncPromoLayout);
+        if (window.ResizeObserver) {
+            new ResizeObserver(syncPromoLayout).observe(promoBar);
+        }
+        requestAnimationFrame(syncPromoLayout);
+        setTimeout(syncPromoLayout, 300);
+        syncPromoLayout();
+
+        /* ============================================================
+           SCROLL REVEAL + NAVBAR
+           ============================================================ */
+        document.addEventListener('DOMContentLoaded', () => {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('active');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.15 });
+            document.querySelectorAll('.reveal-up').forEach(el => observer.observe(el));
+
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('bg-[#0a0508]/95', 'shadow-lg', 'shadow-black/50');
+                    navbar.classList.remove('bg-[#0a0508]/80');
+                } else {
+                    navbar.classList.remove('bg-[#0a0508]/95', 'shadow-lg', 'shadow-black/50');
+                    navbar.classList.add('bg-[#0a0508]/80');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
