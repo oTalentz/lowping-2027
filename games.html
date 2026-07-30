@@ -22,6 +22,37 @@
             --border-green: #3d1a2e;
         }
 
+        /* ===== PRELOADER ===== */
+        .preloader {
+            position: fixed; inset: 0; z-index: 9999;
+            background: #0a0508;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            gap: 2rem; transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        .preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .preloader-logo {
+            font-family: 'Syncopate', sans-serif; font-weight: 700;
+            font-size: 1.5rem; letter-spacing: 0.3em; color: #ff6bb5;
+            text-transform: lowercase; animation: preloaderPulse 1.5s ease-in-out infinite;
+        }
+        .preloader-bar {
+            width: 200px; height: 2px; background: #1a0a14;
+            border-radius: 999px; overflow: hidden; position: relative;
+        }
+        .preloader-bar-fill {
+            position: absolute; left: 0; top: 0; height: 100%;
+            width: 0%; background: linear-gradient(90deg, #ff2d92, #ff6bb5);
+            border-radius: 999px; transition: width 0.3s ease;
+        }
+        .preloader-status {
+            font-family: 'Space Mono', monospace; font-size: 10px;
+            letter-spacing: 0.2em; color: #8a7f8a; text-transform: uppercase;
+        }
+        @keyframes preloaderPulse {
+            0%, 100% { opacity: 0.6; } 50% { opacity: 1; }
+        }
+
         html { overflow-x: hidden; }
 
         body {
@@ -535,6 +566,13 @@
     </style>
 </head>
 <body class="min-h-screen text-white selection:bg-[#ff2d92] selection:text-black relative">
+
+    <!-- PRELOADER -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-logo">lowping</div>
+        <div class="preloader-bar"><div class="preloader-bar-fill" id="preloaderFill"></div></div>
+        <div class="preloader-status" id="preloaderStatus">Carregando...</div>
+    </div>
 
     <!-- Canvas de partículas de fundo (diferente do menu, suave e sutil) -->
     <canvas id="bgParticles" class="fixed inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
@@ -1701,6 +1739,65 @@
                 }
             });
         });
+    </script>
+
+    <!-- PRELOADER SCRIPT -->
+    <script>
+    (function() {
+        const preloader = document.getElementById('preloader');
+        const fill = document.getElementById('preloaderFill');
+        const status = document.getElementById('preloaderStatus');
+        if (!preloader) return;
+
+        let progress = 0;
+        let resourcesTotal = 0;
+        let resourcesLoaded = 0;
+
+        function setProgress(pct, label) {
+            progress = Math.min(pct, 100);
+            if (fill) fill.style.width = progress + '%';
+            if (status && label) status.textContent = label;
+        }
+
+        function finish() {
+            setProgress(100, 'Pronto');
+            setTimeout(() => preloader.classList.add('hidden'), 400);
+        }
+
+        const images = document.querySelectorAll('img[src]');
+        resourcesTotal = images.length;
+        if (resourcesTotal === 0) resourcesTotal = 1;
+
+        setProgress(10, 'Inicializando...');
+
+        images.forEach(function(img) {
+            var src = img.getAttribute('src');
+            if (!src || src.startsWith('data:')) { resourcesLoaded++; return; }
+            var preload = new Image();
+            preload.onload = function() {
+                resourcesLoaded++;
+                var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
+                setProgress(pct, 'Carregando assets...');
+                if (resourcesLoaded >= resourcesTotal) setProgress(80, 'Renderizando...');
+            };
+            preload.onerror = function() {
+                resourcesLoaded++;
+                var pct = 10 + Math.round((resourcesLoaded / resourcesTotal) * 70);
+                setProgress(pct, 'Carregando assets...');
+                if (resourcesLoaded >= resourcesTotal) setProgress(80, 'Renderizando...');
+            };
+            preload.src = src;
+        });
+
+        window.addEventListener('load', function() {
+            setProgress(90, 'Finalizando...');
+            setTimeout(finish, 600);
+        });
+
+        setTimeout(function() {
+            if (!preloader.classList.contains('hidden')) finish();
+        }, 8000);
+    })();
     </script>
 </body>
 </html>
