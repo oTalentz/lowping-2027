@@ -615,24 +615,24 @@
          NAVBAR — mesma identidade da landing page
          ============================================================ -->
     <header class="fixed top-0 w-full z-50 border-b border-white/5 bg-[#0a0508]/80 backdrop-blur-md transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+        <div class="relative max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <!-- Menu toggle (hamburger) -->
             <button id="menuBtn" class="text-white hover:text-[#ff2d92] transition-colors focus:outline-none focus:ring-1 focus:ring-[#ff2d92] focus:ring-offset-4 focus:ring-offset-transparent flex items-center group rounded-sm p-1" aria-label="Abrir Menu">
                 <div class="w-6 h-[2px] bg-current relative before:absolute before:-top-2 before:w-8 before:h-[2px] before:bg-current before:right-0 after:absolute after:top-2 after:w-4 after:h-[2px] after:bg-current after:left-0 group-hover:before:w-6 group-hover:after:w-6 transition-all duration-300"></div>
             </button>
 
-            <div class="font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
+            <div class="absolute left-1/2 -translate-x-1/2 font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
                 lowping
             </div>
 
-            <div class="flex items-center gap-3">
-                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+            <div class="hidden md:flex items-center gap-3">
+                <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                     PAINEL
                 </a>
-                <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                     FINANCEIRO
                 </a>
-                <button id="contactBtn" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                     CONTATO
                 </button>
             </div>
@@ -837,8 +837,8 @@
                 <div class="w-full md:w-auto">
                     <div class="text-[10px] font-mono-tech text-[#8a7f8a] uppercase tracking-[0.2em] mb-4 md:text-right">Ciclo de Cobrança</div>
                     <div class="flex space-x-4 md:justify-end">
-                        <button class="text-xs font-mono-tech uppercase tracking-widest text-[#ff2d92] border border-[#ff2d92] bg-[#ff2d92]/15 px-6 py-3 cut-nw-se transition-all">Mensal</button>
-                        <button class="flex items-center justify-center space-x-2 text-xs font-mono-tech uppercase tracking-widest text-[#8a7f8a] border border-[#3d1a2e] px-6 py-3 cut-nw-se transition-all hover:border-white/30 hover:text-white group">
+                        <button id="cycleMonthly" class="text-xs font-mono-tech uppercase tracking-widest text-[#ff2d92] border border-[#ff2d92] bg-[#ff2d92]/15 px-6 py-3 cut-nw-se transition-all">Mensal</button>
+                        <button id="cycleAnnual" class="flex items-center justify-center space-x-2 text-xs font-mono-tech uppercase tracking-widest text-[#8a7f8a] border border-[#3d1a2e] px-6 py-3 cut-nw-se transition-all hover:border-white/30 hover:text-white group">
                             <span>Anual</span>
                             <span class="bg-[#3d1a2e] text-[#ff2d92] text-[10px] px-2 py-0.5 rounded-sm group-hover:bg-white/10">-15%</span>
                         </button>
@@ -877,8 +877,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">36</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="36" data-annual="30.6">36</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/4gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -908,8 +908,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">72</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="72" data-annual="61.2">72</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/8gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -945,8 +945,8 @@
                                     <div class="border-t border-[#ff2d92]/20 pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech text-[#ff2d92]">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold text-white">108</span>
-                                            <span class="font-mono-tech text-[10px] text-[#ff2d92]/70 uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold text-white plan-price" data-monthly="108" data-annual="91.8">108</span>
+                                            <span class="font-mono-tech text-[10px] text-[#ff2d92]/70 uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/12gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 bg-[#ff2d92] text-black font-semibold text-xs font-mono-tech uppercase tracking-widest hover:bg-white transition-colors cut-nw-se shadow-[0_0_20px_rgba(255,45,146,0.2)] group/btn">
                                             <span>Contratar</span>
@@ -976,8 +976,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">144</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="144" data-annual="122.4">144</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/16gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -1007,8 +1007,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">180</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="180" data-annual="153">180</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/20gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -1038,8 +1038,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">216</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="216" data-annual="183.6">216</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/24gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -1069,8 +1069,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">252</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="252" data-annual="214.2">252</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/28gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -1103,8 +1103,8 @@
                                     <div class="border-t border-[#3d1a2e] pt-6 mt-auto">
                                         <div class="flex items-baseline space-x-2 text-white mb-6">
                                             <span class="text-lg font-mono-tech">R$</span>
-                                            <span class="text-4xl font-syncopate font-bold">288</span>
-                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest">/mês</span>
+                                            <span class="text-4xl font-syncopate font-bold plan-price" data-monthly="288" data-annual="244.8">288</span>
+                                            <span class="font-mono-tech text-[10px] text-[#8a7f8a] uppercase tracking-widest plan-period">/mês</span>
                                         </div>
                                         <a href="https://financeiro.lowping.com.br/index.php?rp=/store/game-br-sao-paulo/32gb" target="_blank" rel="noopener noreferrer" class="plan-btn w-full flex items-center justify-between px-6 py-4 border border-[#3d1a2e] text-xs font-mono-tech text-[#8a7f8a] uppercase tracking-widest hover:text-white hover:border-white transition-colors cut-nw-se group/btn">
                                             <span>Contratar</span>
@@ -1761,10 +1761,76 @@
         });
     </script>
 
+    <!-- TOGGLE MENSAL/ANUAL -->
+    <script>
+    (function() {
+        const btnMonthly = document.getElementById('cycleMonthly');
+        const btnAnnual = document.getElementById('cycleAnnual');
+        const prices = document.querySelectorAll('.plan-price');
+        const periodLabels = document.querySelectorAll('.plan-period');
+        if (!btnMonthly || !btnAnnual) return;
+
+        const activeClasses = ['text-[#ff2d92]', 'border-[#ff2d92]', 'bg-[#ff2d92]/15'];
+        const inactiveClasses = ['text-[#8a7f8a]', 'border-[#3d1a2e]'];
+
+        function setActive(btn, other) {
+            btn.classList.remove(...inactiveClasses);
+            btn.classList.add(...activeClasses);
+            other.classList.remove(...activeClasses);
+            other.classList.add(...inactiveClasses);
+        }
+
+        function showAnnual() {
+            setActive(btnAnnual, btnMonthly);
+            prices.forEach(function(el) {
+                const monthly = el.getAttribute('data-monthly');
+                const annual = el.getAttribute('data-annual');
+                if (el.nextElementSibling && el.nextElementSibling.classList.contains('plan-old-price')) return;
+                // Esconde o R$ original, o preco e o /mês
+                const rsEl = el.previousElementSibling;
+                const periodEl = el.nextElementSibling;
+                if (rsEl) rsEl.style.display = 'none';
+                el.style.display = 'none';
+                if (periodEl && periodEl.classList.contains('plan-period')) periodEl.style.display = 'none';
+                // Cria wrapper com preco antigo riscado + novo preco + /mês alinhado
+                const wrapper = document.createElement('div');
+                wrapper.className = 'plan-old-price flex flex-col leading-none mb-6';
+                wrapper.innerHTML =
+                    '<span class="text-sm font-mono-tech text-[#8a7f8a] line-through opacity-60 mb-1">R$ ' + monthly + '</span>' +
+                    '<span class="flex items-end space-x-2">' +
+                        '<span class="text-4xl font-syncopate font-bold text-[#ff2d92] leading-none">' + annual + '</span>' +
+                        '<span class="font-mono-tech text-[10px] text-[#ff2d92]/70 uppercase tracking-widest leading-none pb-1">/mês*</span>' +
+                    '</span>';
+                el.parentNode.insertBefore(wrapper, el.nextSibling);
+            });
+        }
+
+        function showMonthly() {
+            setActive(btnMonthly, btnAnnual);
+            prices.forEach(function(el) {
+                const rsEl = el.previousElementSibling;
+                // Remove o wrapper promocional primeiro
+                const old = el.nextElementSibling;
+                if (old && old.classList.contains('plan-old-price')) {
+                    old.remove();
+                }
+                // Agora o nextElementSibling e o period original
+                const periodEl = el.nextElementSibling;
+                if (rsEl) rsEl.style.display = '';
+                el.style.display = '';
+                if (periodEl && periodEl.classList.contains('plan-period')) periodEl.style.display = '';
+            });
+        }
+
+        btnMonthly.addEventListener('click', showMonthly);
+        btnAnnual.addEventListener('click', showAnnual);
+    })();
+    </script>
+
     <!-- PRELOADER + SERVICE WORKER -->
     <script>
     (function() {
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && location.hostname === 'localhost') {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').catch(function(e) {
                     console.warn('SW registration failed:', e);

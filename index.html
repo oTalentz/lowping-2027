@@ -530,23 +530,23 @@
         <div class="relative z-20 flex flex-col h-full w-full pointer-events-none">
             
             <!-- HEADER -->
-            <header class="flex justify-between items-center px-6 lg:px-16 py-10 pointer-events-auto w-full animate-fade-in-up">
+            <header class="relative flex justify-between items-center px-6 lg:px-16 py-10 pointer-events-auto w-full animate-fade-in-up">
                 <button id="menuBtn" class="text-white hover:text-[#ff2d92] transition-colors focus:outline-none focus:ring-1 focus:ring-[#ff2d92] focus:ring-offset-4 focus:ring-offset-transparent flex items-center group rounded-sm p-1" aria-label="Abrir Menu">
                     <div class="w-6 h-[2px] bg-current relative before:absolute before:-top-2 before:w-8 before:h-[2px] before:bg-current before:right-0 after:absolute after:top-2 after:w-4 after:h-[2px] after:bg-current after:left-0 group-hover:before:w-6 group-hover:after:w-6 transition-all duration-300"></div>
                 </button>
                 
-                <div class="font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
+                <div class="absolute left-1/2 -translate-x-1/2 font-mono-tech text-xs tracking-[0.3em] text-[#ff6bb5] font-bold select-none cursor-default">
                     lowping
                 </div>
                 
-                <div class="flex items-center gap-3">
-                    <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                <div class="hidden md:flex items-center gap-3">
+                    <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                         PAINEL
                     </a>
-                    <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                    <a href="https://financeiro.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                         FINANCEIRO
                     </a>
-                    <button id="contactBtn" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                    <button id="contactBtn" class="font-mono-tech text-xs tracking-[0.2em] border border-[#ff2d92]/40 px-5 py-2.5 rounded text-white hover:bg-[#ff2d92] hover:text-black hover:border-[#ff2d92] transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92] font-bold">
                         CONTATO
                     </button>
                 </div>
@@ -582,6 +582,28 @@
                             </svg>
                         </a>
                     </div>
+                </div>
+            </section>
+
+            <!-- SERVIÇOS -->
+            <section class="px-8 lg:px-20 pb-8 pointer-events-auto animate-fade-in-up delay-700">
+                <div class="flex flex-col gap-3 max-w-xs">
+                    <!-- Games -->
+                    <a href="games.html" class="group relative border border-[#3d1a2e] p-4 rounded hover:border-[#ff2d92] transition-all duration-300 bg-[#0d050a]/60">
+                        <div class="flex items-center gap-3 mb-1.5">
+                            <i class="ph-fill ph-game-controller text-2xl text-[#ff2d92]"></i>
+                            <span class="font-syncopate text-sm tracking-[0.15em] uppercase text-white font-bold">Games</span>
+                        </div>
+                        <p class="text-xs text-[#d4c8d4] leading-relaxed">Servidores Minecraft com Ryzen 9 5950X, proteção DDoS e baixa latência. Planos de 4GB a 32GB.</p>
+                    </a>
+                    <!-- VPS -->
+                    <a href="vps.html" class="group relative border border-[#3d1a2e] p-4 rounded hover:border-[#ff2d92] transition-all duration-300 bg-[#0d050a]/60">
+                        <div class="flex items-center gap-3 mb-1.5">
+                            <i class="ph-fill ph-cpu text-2xl text-[#ff2d92]"></i>
+                            <span class="font-syncopate text-sm tracking-[0.15em] uppercase text-white font-bold">VPS</span>
+                        </div>
+                        <p class="text-xs text-[#d4c8d4] leading-relaxed">VPS premium com NVMe SSD, Ryzen 9 5950X e proteção DDoS. Performance de ponta para sua infraestrutura.</p>
+                    </a>
                 </div>
             </section>
 
@@ -1207,7 +1229,7 @@
     <script>
     (function() {
         // Registra service worker para cache offline
-        if ('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator && location.hostname === 'localhost') {
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('/sw.js').catch(function(e) {
                     console.warn('SW registration failed:', e);
