@@ -41,9 +41,9 @@
             content: '';
             position: fixed;
             inset: 0;
-            background-color: rgba(10, 5, 8, 0.75);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background-color: rgba(10, 5, 8, 0.6);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 0;
         }
 
@@ -65,7 +65,7 @@
             mask-image: linear-gradient(to right, transparent 0%, transparent 5%, black 25%, black 100%);
         }
         .jinx-mask img {
-            filter: brightness(1.4) saturate(1.3) contrast(1.1);
+            filter: brightness(1.8) saturate(1.5) contrast(1.15) drop-shadow(0 0 30px rgba(255,45,146,0.15));
         }
 
         /* Large background watermark text */
@@ -127,8 +127,8 @@
             to { opacity: 1; transform: translateX(0); }
         }
         @keyframes subtleScale {
-            0% { transform: scale(1.08); opacity: 0; filter: blur(4px) brightness(1.4) saturate(1.3) contrast(1.1); }
-            100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1.4) saturate(1.3) contrast(1.1); }
+            0% { transform: scale(1.08); opacity: 0; filter: blur(4px) brightness(1.8) saturate(1.5) contrast(1.15) drop-shadow(0 0 30px rgba(255,45,146,0.15)); }
+            100% { transform: scale(1); opacity: 1; filter: blur(0) brightness(1.8) saturate(1.5) contrast(1.15) drop-shadow(0 0 30px rgba(255,45,146,0.15)); }
         }
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -439,7 +439,7 @@
     <canvas id="bgParticles" class="fixed inset-0 w-full h-full z-0 pointer-events-none" aria-hidden="true"></canvas>
 
     <!-- Main Content Boundary (The "lowping Square") -->
-    <main class="w-full h-screen min-h-screen flex flex-col relative preserve-3d isolate bg-[#0d050a]/60 backdrop-blur-md overflow-hidden z-20">
+    <main class="w-full h-screen min-h-screen flex flex-col relative preserve-3d isolate bg-[#0d050a]/40 backdrop-blur-sm overflow-hidden z-20">
 
         <!-- Scanline + Sweep + Vignette overlays -->
         <div class="scanline-overlay"></div>
@@ -535,13 +535,6 @@
                    <span>01 / 07</span>
                    <div class="w-12 h-[1px] bg-[#3d1a2e]"></div>
                </div>
-
-               <!-- Center Scroll Indicator -->
-               <button id="scrollIndicator" class="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-50 hover:opacity-100 transition-opacity focus:outline-none group pointer-events-auto" aria-label="Rolar para baixo">
-                   <div class="w-5 h-8 rounded-full border border-white/40 group-hover:border-[#ff2d92]/80 flex justify-center p-1 transition-colors duration-300">
-                       <div class="w-1 h-1.5 bg-white group-hover:bg-[#ff2d92] rounded-full scroll-dot transition-colors duration-300"></div>
-                   </div>
-               </button>
 
                <!-- Right Copyright -->
                <div class="ml-auto w-full text-right pointer-events-none mb-1">
@@ -941,10 +934,6 @@
             const btn = e.currentTarget;
             btn.classList.add('bg-[#ff2d92]/20');
             setTimeout(() => btn.classList.remove('bg-[#ff2d92]/20'), 300);
-        });
-
-        document.getElementById('scrollIndicator').addEventListener('click', () => {
-            ToastController.show('Descendo para os níveis inferiores');
         });
 
         document.querySelectorAll('.social-btn').forEach(btn => {
