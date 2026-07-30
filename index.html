@@ -472,6 +472,9 @@
                 </div>
                 
                 <div class="flex items-center gap-3">
+                    <button id="contactBtn" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
+                        CONTATO
+                    </button>
                     <a href="https://painel.lowping.com.br/" target="_blank" rel="noopener noreferrer" class="font-mono-tech text-[10px] tracking-[0.2em] border border-white/20 px-5 py-2.5 rounded hover:bg-white hover:text-black transition-all focus:outline-none focus:ring-1 focus:ring-[#ff2d92]">
                         PAINEL
                     </a>
@@ -901,6 +904,10 @@
         // Attach event listeners
         document.getElementById('menuBtn').addEventListener('click', () => {
             KineticNav.toggle();
+        });
+
+        document.getElementById('contactBtn').addEventListener('click', () => {
+            document.getElementById('contactModal').classList.add('open');
         });
 
         document.getElementById('contactModalClose').addEventListener('click', () => {
